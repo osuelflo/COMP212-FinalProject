@@ -1,0 +1,52 @@
+# Milestone One
+Names: Owen Suelflow, Jacob Posner, Sam Anthony
+
+## Topic:
+Looking at historical price data on individual tickers to glean insight into how prices change.
+
+## Broad Questions:
+1. What indicators predict price the best?
+2. When a stock has earnings (e.g. reports how they did in the previous quarter), how does that affect stock price?
+3. How can we best predict when a stock will change trends (e.g. go from an up trend to a down trend)
+
+## Reading in data
+
+#### Setup
+
+```{r, message=FALSE, error=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+We have historical price data on all stocks in the Nasdaq. Each stock has its own ticker (e.g. 'AAPL'), and each has its own csv file with price data.
+```{r, message=FALSE, error=FALSE}
+# Reading in price data for 'AAPL'
+aapl <- read_csv("../data/nasdaq_prices/stocks/AAPL.csv")
+```
+
+```{r}
+tail(aapl)
+```
+
+## Codebook
+
+1. Date
+- A `date` object that lists the date in "YYYY-MM-DD" format
+2. Open
+- A double that gives the opening price of the stock each day
+3. High
+- A double that gives the high price of the stock each day
+4. Low
+- A double that gives the low price of the stock each day
+5. Close
+- A double that gives the closing price of the stock each day
+6. Adj Close
+- A double that gives the adjusted closing price of the stock each day (we will not be using this)
+7. Volume
+- A double that gives the amount of shares traded of the stock each day.
+
+## Next Steps
+
+We can try to answer the first question: Which indicators predict price the best? An indicator is a technical analysis tool that uses price data to produce a numerical value that tells us some information about the price. Most indicators can be calculated from the data we have.
+
