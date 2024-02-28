@@ -51,3 +51,8 @@ tail(aapl)
 
 We can try to answer the first question: Which indicators predict price the best? An indicator is a technical analysis tool that uses price data to produce a numerical value that tells us some information about the price. Most indicators can be calculated from the data we have.
 
+```{r}
+sessionInfo()
+```
+
+
