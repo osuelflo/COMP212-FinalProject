@@ -29,6 +29,7 @@ aapl <- read_csv("../data/nasdaq_prices/stocks/AAPL.csv")
 tail(aapl)
 ```
 
+
 ## Codebook
 
 1. Date
