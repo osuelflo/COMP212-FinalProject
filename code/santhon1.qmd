@@ -6,6 +6,8 @@ library(tidyverse)
 
 
 ```{r}
+# AAAU is the 'Goldman Sachs Physical Gold ETF', just using here for practice etc.
+
 AAAU <- read_csv("../data/nasdaq_prices/etfs/AAAU.csv")
 GDPC1 <- read_csv("../data/GDPC1.csv")
 historicalinflation <- read_csv("../data/historicalinflationcalculator.csv")
