@@ -7,5 +7,22 @@ library(tidyverse)
 
 ```{r}
 AAAU <- read_csv("../data/nasdaq_prices/etfs/AAAU.csv")
+GDPC1 <- read_csv("../data/GDPC1.csv")
+historicalinflation <- read_csv("../data/historicalinflationcalculator.csv")
 ```
+
+
+```{r}
+DailyPriceChange <- function(data){
+  data %>% 
+  mutate(DailyPriceChange = (Open - Close))
+}
+```
+
+```{r}
+DailyPriceChange(AAAU)
+```
+
+
+
 
