@@ -1,0 +1,11 @@
+
+```{r}
+library(readr)
+library(tidyverse)
+```
+
+
+```{r}
+AAAU <- read_csv("../data/nasdaq_prices/etfs/AAAU.csv")
+```
+
