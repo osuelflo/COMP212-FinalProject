@@ -3,4 +3,4 @@
 .Rproj.user
 *.Rproj
 .quarto/
-
+.RData

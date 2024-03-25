@@ -1,0 +1,96 @@
+# Milestone Two
+Names: Owen Suelflow, Jacob Posner, Sam Anthony
+
+# Steps from Milestone Two
+Here was our previous plan:
+
+We can try to answer the first question: Which indicators predict price the best? An indicator is a technical analysis tool that uses price data to produce a numerical value that tells us some information about the price. Most indicators can be calculated from the data we have.
+
+## Setup
+
+```{r, message=FALSE}
+library(tidyverse)
+library(stringr)
+```
+
+First, we grab price data from 10 of the most popular stocks. Given this is just exploratory, it makes sense to just stick with 10 stocks, rather than using all of our data. We will choose 10 stocks with high market cap, in no particular order:
+
+1. AAPL
+2. AMZN
+3. TSLA
+4. NVDA
+5. MSFT
+6. META (Still known as Facebook at the time this data was collected)
+7. GOOGL
+8. LLY
+9. WMT
+10. TGT
+
+
+```{r,message=FALSE,warning=FALSE}
+tickers = c("AAPL","AMZN","TSLA","NVDA","MSFT","FB","GOOGL","LLY","WMT","TGT")
+tenStocks <- read_csv("../data/nasdaq_prices/stocks/AAPL.csv")
+tenStocks <- tenStocks %>% 
+  mutate(ticker = "AAPL")
+for(tick in tickers){
+  tenStocks2 <- read_csv(str_c("../data/nasdaq_prices/stocks/",tick,".csv"))
+  tenStocks2 <- tenStocks2 %>% 
+    mutate(ticker = tick,
+           sma_20 = NA,
+           sma_50 = NA,
+           sma_100 = NA,
+           sma_200 = NA,
+           ema_20 = NA,
+           ema_50 = NA,
+           ema_100 = NA,
+           ema_200 = NA)
+  tenStocks2$sma_20 = my_EMA(tenStocks2,tenStocks2$sma_20,20)
+  tenStocks2$sma_50 = my_EMA(tenStocks2,tenStocks2$sma_50,50)
+  tenStocks2$sma_100 = my_EMA(tenStocks2,tenStocks2$sma_100,100)
+  tenStocks2$sma_200 = my_EMA(tenStocks2,tenStocks2$sma_200,200)
+  tenStocks2$ema_20 = my_EMA(tenStocks2,tenStocks2$ema_20,20)
+  tenStocks2$ema_50 = my_EMA(tenStocks2,tenStocks2$ema_50,50)
+  tenStocks2$ema_100 = my_EMA(tenStocks2,tenStocks2$ema_100,100)
+  tenStocks2$ema_200 = my_EMA(tenStocks2,tenStocks2$ema_200,200)
+  tenStocks <- full_join(tenStocks,tenStocks2)
+}
+```
+
+```{r}
+x <- tenStocks2$Close
+print(x[1:100])
+print("------------------------")
+print(rollmean(x[1:100],10))
+print(mean(x[2:11]))
+```
+
+
+```{r,error=FALSE,message=FALSE}
+my_SMA <- function(df, col, n){
+  # for(i in n:nrow(df)){
+  #   col[i] = mean(df$Close[i-n+1:i])
+  # }
+  # return(col)
+  return(rollmean(df$Close,n))
+}
+```
+
+```{r}
+my_EMA <- function(df,col,n){
+  for(i in n:nrow(df)){
+    mult = 2/(n+1)
+    if(i == n){
+      col[i] = mean(df$Close[i-n+1:i])
+    }
+    else{
+      col[i] = df$Close*mult+(1-mult)*col[i-1]
+    }
+  }
+  return(col)
+}
+```
+
+```{r}
+tail(tenStocks2,100)
+```
+
