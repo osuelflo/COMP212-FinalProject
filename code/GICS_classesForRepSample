@@ -2,4 +2,28 @@ We decided to try to identify a group of stocks that would give us a good repres
 
 After some research we learned of GICS Stock Market Sectors. They are global industry classification standards for all listed companies on the market. All stocks are put into sectors by GICS or its rival stock classfier the ICB. For our purposes the differences between the classification systems isn't super relevent because we only really care about creating an accurate picture of the market through a sample of all stock 'sectors'. Overall, both the ICB and GICS can inform our choices and their general sector classs are similar even though they both take a different approach to classifying stocks.
 
-At the end of the day we have decided to choose our stocks to be representative of the market
+At the end of the day we have decided to choose our stocks that try to be representative of the market using the GICS classification because it has been more long standing in the market (1999 vs 2004). 
+
+"The GICS classification system consists of four levels. As of 2022, there are 11 sectors, 25 industry groups, 74 industries, and 163 sub-industries."
+(from: https://www.investopedia.com/articles/stocks/08/global-industry-classification-industrial-classification-benchmark.asp)
+
+We have chosen to use data from one (or two) stocks from each of the 11 GICS sectors to try and provide a large scale picture of how the market reacts to changes in certain indicators. For Sectors in which we believed there were more than one stock needed to give a representative picture (for example, Industrials) we have selected two stocks. In industrials we have chosen UPS and Raytheon. Raytheon because they represent the defense and engineering side of this sector and UPS because it shows the transportation side of the sector. In other cases like with Microsoft and Google we have chosen two stocks because we believed neither one nor the other were more representative than the other and have elected to use two for such sectors to ensure we keep our view broad.
+
+
+At a glance, the 11 GICS stock market sectors are:
+(Our stock choices are in parentheses after the sectors)
+(from: https://www.fool.com/investing/stock-market/market-sectors/)
+
+- Energy (XOM - ExxonMobil)
+- Materials (SHW - Sherwinn-Williams)
+- Industrials (UPS) AND (RTX - Raytheon)
+- Utilities (AEP - American Electric Power)
+- Healthcare (UNH - United Health Group)
+- Financials (JPM - JP Morgan Chase)
+- Consumer Discretionary (AMZN - Amazon) AND (MCD - McDonalds)
+- Consumer Staples (KO - CocaCola) AND (PG - Proctor and Gamble)
+- Information Technology (APPL - Apple) AND (MSFT - Microsoft)
+- Communication Services (FB - Facebook) AND (GOOG - Google)
+- Real Estate (AMT - American Tower) AND (SPG - Simon Property Group)
+
+
