@@ -17,24 +17,36 @@ historicalinflation <- read_csv("../data/historicalinflationcalculator.csv")
 
 
 ```{r}
-DailyPriceChange <- function(data){
-  data %>% 
-  mutate(DailyPriceChange = (Open - Close))
+ExtraIndicators <- function(data) {
+  data %>%
+    mutate(pRange = High - Low,
+           PriceDirection = ifelse(Open < Close, "Increase", ifelse(Open > Close, "Decrease", "No Change")),
+           DailyPricePercentage = ((Close - Open) / Open) * 100,
+           DailyPriceChange = Open - Close,
+           PriceVolatilityPercent = ((High - Low) / Open) * 100)
 }
 ```
 
+
 ```{r}
-AAAU <- DailyPriceChange(AAAU)
-XOM <- DailyPriceChange(XOM)
+XOM <- ExtraIndicators(XOM)
 ```
 
 
+
 ```{r}
-# daily price change over time for XOM stock. 
+XOM %>% 
+count(PriceDirection == "Increase")
+```
+
+
+
+
+```{r}
+# Daily Price Change Over Time For XOM Stock. 
 ggplot(data = XOM, aes(x = Date, y = Volume))+
   geom_point()+
   geom_smooth()+
   labs(title= "Exxon Mobil Volume Traded Over Time", x = "Date", y = "Volume")
 ```
-
 
