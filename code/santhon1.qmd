@@ -9,6 +9,8 @@ library(tidyverse)
 # AAAU is the 'Goldman Sachs Physical Gold ETF', just using here for practice etc.
 
 AAAU <- read_csv("../data/nasdaq_prices/etfs/AAAU.csv")
+
+XOM <- read_csv("../data/nasdaq_prices/stocks/XOM.csv")
 GDPC1 <- read_csv("../data/GDPC1.csv")
 historicalinflation <- read_csv("../data/historicalinflationcalculator.csv")
 ```
@@ -22,9 +24,17 @@ DailyPriceChange <- function(data){
 ```
 
 ```{r}
-DailyPriceChange(AAAU)
+AAAU <- DailyPriceChange(AAAU)
+XOM <- DailyPriceChange(XOM)
 ```
 
 
+```{r}
+# daily price change over time for XOM stock. 
+ggplot(data = XOM, aes(x = Date, y = Volume))+
+  geom_point()+
+  geom_smooth()+
+  labs(title= "Exxon Mobil Volume Traded Over Time", x = "Date", y = "Volume")
+```
 
 
