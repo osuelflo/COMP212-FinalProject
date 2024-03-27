@@ -1,3 +1,50 @@
 ```{r}
-read.csv()
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+#Read in inflation data 
+Inflation <- read.csv("data/historicalinflationcalculator.csv") %>% 
+  filter(Year != 2024)
 ```
+
+
+```{r}
+#Comparing Inflation over time by month
+
+Inflation$Feb <- as.numeric(Inflation$Feb)
+
+
+Inflation1 <- pivot_longer(Inflation, cols = -Year, names_to = "Month", values_to = "Rate")
+
+Inflation1 <- Inflation1 %>% 
+  filter(Month != "Ave")
+
+# Define the order of months
+month_order <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+# Convert "Month" to factor with defined order
+Inflation1$Month <- factor(Inflation1$Month, levels = month_order)
+
+
+# Plotting
+ggplot(Inflation1, aes(x = Year, y = Rate)) +
+  geom_line() +
+  facet_wrap(~ Month, scales = "free_y", ncol = 4) +
+  labs(x = "Year", y = "Rate", title = "Rate by Month")
+```
+
+```{r}
+#Average inflation rate per year through time 
+ggplot(Inflation, aes(x=Year, y=Ave))+
+  geom_col()
+```
+
+```{r}
+#Read in data for apple
+Apple <- read.csv("data/nasdaq_prices/stocks/AAPL.csv")
+
+#Plot that shows open and closing prices as well as high and low
+ggplot(Apple, aes(x=Date))+
+  geom_linerange(aes(ymin=Low, ymax = High))
+```
+
