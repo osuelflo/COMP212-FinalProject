@@ -48,3 +48,51 @@ ggplot(Apple, aes(x=Date))+
   geom_linerange(aes(ymin=Low, ymax = High))
 ```
 
+
+
+```{r}
+library(tidyr)
+library(stringr)
+```
+
+
+
+
+```{r}
+stock_join1 <- function(csv1, csv2) {
+  # Extract stock names from file paths
+  stockName1 <- str_extract(csv1, "[^/]+(?=\\.csv$)")
+  stockName2 <- str_extract(csv2, "[^/]+(?=\\.csv$)")
+  
+  # Read in stock .csv files
+  Stock1 <- read.csv(csv1)
+  Stock2 <- read.csv(csv2)
+  
+  # Add 'Company' column to each dataset
+  Stock1$Company <- stockName1
+  Stock2$Company <- stockName2
+  
+  # Pivot data longer for stock1
+  Stock1_long <- pivot_longer(Stock1, 
+                              cols = -c(Date, Company),  
+                              names_to = "Variable", 
+                              values_to = "Value")
+  
+  # Pivot data longer for stock2
+  Stock2_long <- pivot_longer(Stock2, 
+                              cols = -c(Date, Company),  
+                              names_to = "Variable", 
+                              values_to = "Value")
+  
+  # Join the two datasets by date
+  joined_data <- merge(Stock1_long, Stock2_long, by = "Date", suffixes = c(paste0("_", stockName1), paste0("_", stockName2)))
+  
+  print(joined_data)
+}
+
+```
+
+```{r}
+stock_join1("data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv")
+```
+
