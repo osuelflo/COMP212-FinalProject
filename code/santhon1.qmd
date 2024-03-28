@@ -9,22 +9,44 @@ library(tidyverse)
 # AAAU is the 'Goldman Sachs Physical Gold ETF', just using here for practice etc.
 
 AAAU <- read_csv("../data/nasdaq_prices/etfs/AAAU.csv")
+
+XOM <- read_csv("../data/nasdaq_prices/stocks/XOM.csv")
 GDPC1 <- read_csv("../data/GDPC1.csv")
 historicalinflation <- read_csv("../data/historicalinflationcalculator.csv")
 ```
 
 
 ```{r}
-DailyPriceChange <- function(data){
-  data %>% 
-  mutate(DailyPriceChange = (Open - Close))
+ExtraIndicators <- function(data) {
+  data %>%
+    mutate(pRange = High - Low,
+           PriceDirection = ifelse(Open < Close, "Increase", ifelse(Open > Close, "Decrease", "No Change")),
+           DailyPricePercentage = ((Close - Open) / Open) * 100,
+           DailyPriceChange = Open - Close,
+           PriceVolatilityPercent = ((High - Low) / Open) * 100)
 }
 ```
 
+
 ```{r}
-DailyPriceChange(AAAU)
+XOM <- ExtraIndicators(XOM)
 ```
 
 
 
+```{r}
+XOM %>% 
+count(PriceDirection == "Increase")
+```
+
+
+
+
+```{r}
+# Daily Price Change Over Time For XOM Stock. 
+ggplot(data = XOM, aes(x = Date, y = Volume))+
+  geom_point()+
+  geom_smooth()+
+  labs(title= "Exxon Mobil Volume Traded Over Time", x = "Date", y = "Volume")
+```
 
