@@ -63,6 +63,7 @@ library(dplyr)
 
 
 stock_join <- function(csv1, csv2) {
+  options(scipen = 999)
   # Extract stock names from file paths
   stockName1 <- str_extract(csv1, "[^/]+(?=\\.csv$)")
   stockName2 <- str_extract(csv2, "[^/]+(?=\\.csv$)")
@@ -90,18 +91,6 @@ stock_join <- function(csv1, csv2) {
   # Join the two datasets by date and variable
   joined_data1 <- merge(Stock1_long, Stock2_long, by = c("Date", "Variable"), suffixes = c(paste0("_", stockName1), paste0("_", stockName2)))
   
-  # Convert scientific notation to regular decimal notation for numeric columns
-  numeric_cols <- grepl("^Value_", names(joined_data1))
-  joined_data1[numeric_cols] <- lapply(joined_data1[numeric_cols], function(x) {
-    if(is.numeric(x)) {
-      format(x, scientific = FALSE)
-    } else {
-      x
-    }
-  })
-
-  
-  print(joined_data1)
 }
 
 ```
@@ -109,5 +98,58 @@ stock_join <- function(csv1, csv2) {
 ```{r}
 joined_data1<-stock_join("data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv")
 ```
+
+```{r}
+join_data_csv <- function(joined_data, csv) {
+  options(scipen = 999)
+  # Extract stock name from file path
+  stockName <- str_extract(csv, "[^/]+(?=\\.csv$)")
+  
+  # Read in new stock .csv file
+  new_stock <- read.csv(csv)
+  
+  # Add 'Company' column to the new dataset
+  new_stock$Company <- stockName
+  
+  # Pivot data longer for the new stock dataset
+  new_stock_long <- pivot_longer(new_stock, 
+                                 cols = -c(Date, Company),  
+                                 names_to = "Variable", 
+                                 values_to = "Value")
+  
+  # Join the two datasets by date and variable
+  completely_joined_data <- merge(new_stock_long, joined_data, by = c("Date", "Variable"), suffixes = c(paste0("_", stockName), ""))
+}
+
+```
+
+```{r}
+joined<-join_data_csv(joined_data1, "data/nasdaq_prices/stocks/XOM.csv")
+```
+
+```{r}
+join_all<-function(csv1, csv2, csv3, csv4, csv5, csv6, csv7, csv8, csv9, csv10, csv11, csv12, csv13){
+  #Joining all of the .csv files into one data set. Letters are just placeholders
+  a<-join_data_csv(joined, csv1)
+  b<-join_data_csv(a, csv2)
+  c<-join_data_csv(b, csv3)  
+  d<-join_data_csv(c, csv4)
+  e<-join_data_csv(d, csv5)
+  f<-join_data_csv(e, csv6)
+  g<-join_data_csv(f, csv7)  
+  h<-join_data_csv(g, csv8)
+  i<-join_data_csv(h, csv9)
+  j<-join_data_csv(i, csv10)
+  k<-join_data_csv(j, csv11)  
+  l<-join_data_csv(k, csv12)
+  m<-join_data_csv(l, csv13)
+  return(m)
+}
+```
+
+```{r}
+Final_dataset<-join_all("data/nasdaq_prices/stocks/SHW.csv", "data/nasdaq_prices/stocks/UPS.csv", "data/nasdaq_prices/stocks/AEP.csv", "data/nasdaq_prices/stocks/UNH.csv", "data/nasdaq_prices/stocks/JPM.csv", "data/nasdaq_prices/stocks/AMZN.csv", "data/nasdaq_prices/stocks/MCD.csv", "data/nasdaq_prices/stocks/KO.csv", "data/nasdaq_prices/stocks/PG.csv", "data/nasdaq_prices/stocks/FB.csv", "data/nasdaq_prices/stocks/GOOG.csv", "data/nasdaq_prices/stocks/AMT.csv", "data/nasdaq_prices/stocks/SPG.csv")
+```
+
 
 
