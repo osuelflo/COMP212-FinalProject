@@ -56,7 +56,12 @@ library(stringr)
 library(tidyverse)
 library(dplyr)
 ```
+
+
 ```{r}
+#Function to join two .csv files
+
+
 stock_join <- function(csv1, csv2) {
   # Extract stock names from file paths
   stockName1 <- str_extract(csv1, "[^/]+(?=\\.csv$)")
@@ -82,53 +87,27 @@ stock_join <- function(csv1, csv2) {
                               names_to = "Variable", 
                               values_to = "Value")
   
-  # Join the two datasets by date
-  joined_data <- merge(Stock1_long, Stock2_long, by = "Date", suffixes = c(paste0("_", stockName1), paste0("_", stockName2)))
+  # Join the two datasets by date and variable
+  joined_data1 <- merge(Stock1_long, Stock2_long, by = c("Date", "Variable"), suffixes = c(paste0("_", stockName1), paste0("_", stockName2)))
   
-  print(joined_data)
+  # Convert scientific notation to regular decimal notation for numeric columns
+  numeric_cols <- grepl("^Value_", names(joined_data1))
+  joined_data1[numeric_cols] <- lapply(joined_data1[numeric_cols], function(x) {
+    if(is.numeric(x)) {
+      format(x, scientific = FALSE)
+    } else {
+      x
+    }
+  })
+
+  
+  print(joined_data1)
 }
 
 ```
 
 ```{r}
-stock_join("data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv")
+joined_data1<-stock_join("data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv")
 ```
 
-```{r}
-stock_join1 <- function(csv1, csv2) {
-  # Extract stock names from file paths
-  stockName1 <- str_extract(csv1, "[^/]+(?=\\.csv$)")
-  stockName2 <- str_extract(csv2, "[^/]+(?=\\.csv$)")
-  
-  # Read in stock .csv files
-  Stock1 <- read.csv(csv1)
-  Stock2 <- read.csv(csv2)
-  
-  # Add 'Company' column to each dataset
-  Stock1$Company <- stockName1
-  Stock2$Company <- stockName2
-  
-  # Pivot data longer for stock1
-  Stock1_long <- pivot_longer(Stock1, 
-                              cols = -c(Date, Company),  
-                              names_to = "Variable", 
-                              values_to = "Value")
-  
-  # Pivot data longer for stock2
-  Stock2_long <- pivot_longer(Stock2, 
-                              cols = -c(Date, Company),  
-                              names_to = "Variable", 
-                              values_to = "Value")
-  
-  # Join the two datasets by date
-  joined_data <- left_join(Stock1_long, Stock2_long, by = "Date")
-  
-  print(joined_data)
-}
-
-```
-
-```{r}
-stock_join1("data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv")
-```
 
