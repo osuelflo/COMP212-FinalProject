@@ -7,24 +7,24 @@ At the end of the day, we decided to choose stocks that best represent the curre
 "The GICS classification system consists of four levels. As of 2022, there are 11 sectors, 25 industry groups, 74 industries, and 163 sub-industries."
 (from: https://www.investopedia.com/articles/stocks/08/global-industry-classification-industrial-classification-benchmark.asp)
 
-We chose to use data from one or two stocks from each of the 11 GICS sectors to try and provide a large-scale picture of how the market reacts to changes in certain indicators. For Sectors in which we believed there was more than one stock needed to give a representative picture (for example, Industrials) we have selected two stocks. In industrials, we have chosen UPS and Raytheon. We chose Raytheon because it represents the defense and engineering side of this sector and UPS because it shows the transportation side of the sector. In other cases, like with Microsoft and Google, we chose both of their stocks because neither of the two stocks is more representative than the other in our current market. For consumer industries, we decided to choose Amazon and McDonald’s because they represent different parts of the wide range of the consumer industry. By selecting two stocks in industries where we see fit, we ensure that we represent the majority of a sector but also keep our views broad enough. 
+We chose to use data from one or two stocks from each of the 11 GICS sectors to try and provide a large-scale picture of how the market reacts to changes in certain indicators. For Sectors in which we believed there was more than one stock needed to give a representative picture (for example, Industrials) we have selected two stocks. In industrials, we have chosen UPS and 3M. We chose 3M because it represents the industrial production and engineering side of this sector and UPS because it shows the transportation side of the sector. In other cases, like with Microsoft and Apple, we chose both of their stocks because neither of the two stocks is more representative than the other in our current market. For consumer industries, we decided to choose Amazon and McDonald’s because they represent different parts of the wide range of the consumer industry. By selecting two stocks in industries where we see fit, we ensure that we represent the majority of a sector but also keep our views broad enough. 
 
 
 At a glance, the 11 GICS stock market sectors are:
 (Our stock choices are in parentheses after the sectors)
 (from: https://www.fool.com/investing/stock-market/market-sectors/)
 
-- Energy (XOM - ExxonMobil)
-- Materials (SHW - Sherwinn-Williams)
-- Industrials (UPS - United Postal Service) AND (RTX - Raytheon)
-- Utilities (AEP - American Electric Power)
-- Healthcare (UNH - United Health Group)
-- Financials (JPM - JP Morgan Chase)
-- Consumer Discretionary (AMZN - Amazon) AND (MCD - McDonalds)
-- Consumer Staples (KO - CocaCola) AND (PG - Proctor and Gamble)
-- Information Technology (APPL - Apple) AND (MSFT - Microsoft)
-- Communication Services (FB - Facebook) AND (GOOG - Google)
-- Real Estate (AMT - American Tower) AND (SPG - Simon Property Group)
+- Energy (XOM - ExxonMobil, 1962)
+- Materials (SHW - Sherwinn-Williams, 1980)
+- Industrials (UPS - United Postal Service, 1999) AND (3M - MMM, 1970 )
+- Utilities (AEP - American Electric Power, from 1970)
+- Healthcare (UNH - United Health Group, 1984)
+- Financials (JPM - JP Morgan Chase, 1980)
+- Consumer Discretionary (AMZN - Amazon, from 1997) AND (MCD - McDonalds, 1966)
+- Consumer Staples (KO - CocaCola, 1962) AND (PG - Proctor and Gamble, 1962)
+- Information Technology (APPL - Apple, from 1980) AND (MSFT - Microsoft, 1986)
+- Communication Services (GOOG - Google, 2004)
+- Real Estate (AMT - American Tower, 1998) AND (SPG - Simon Property Group, 1993)
 
 
 
