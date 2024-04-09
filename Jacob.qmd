@@ -2,154 +2,135 @@
 library(ggplot2)
 library(dplyr)
 library(tidyverse)
-#Read in inflation data 
-Inflation <- read.csv("data/historicalinflationcalculator.csv") %>% 
-  filter(Year != 2024)
+# #Read in inflation data 
+# Inflation <- read.csv("data/historicalinflationcalculator.csv") %>% 
+#   filter(Year != 2024)
+# ```
+# 
+# 
+# 
+# ```{r}
+# library(tidyr)
+# library(stringr)
+# library(tidyverse)
+# library(dplyr)
+# ```
+# 
+# 
+# ```{r}
+# #Function to join two .csv files
+# 
+# stock_join <- function(csv1, csv2) {
+#   options(scipen = 999)
+#   # Extract stock names from file paths
+#   stockName1 <- str_extract(csv1, "[^/]+(?=\\.csv$)")
+#   stockName2 <- str_extract(csv2, "[^/]+(?=\\.csv$)")
+#   
+#   # Read in stock .csv files
+#   Stock1 <- read.csv(csv1)
+#   Stock2 <- read.csv(csv2)
+#   
+#   # Add 'Company' column to each dataset
+#   Stock1$Company <- stockName1
+#   Stock2$Company <- stockName2
+#   
+#   # Pivot data longer for stock1
+#   Stock1_long <- pivot_longer(Stock1, 
+#                               cols = -c(Date, Company),  
+#                               names_to = "Variable", 
+#                               values_to = "Value")
+#   
+#   # Pivot data longer for stock2
+#   Stock2_long <- pivot_longer(Stock2, 
+#                               cols = -c(Date, Company),  
+#                               names_to = "Variable", 
+#                               values_to = "Value")
+#   
+#   # Join the two datasets by date and variable
+#   joined_data1 <- merge(Stock1_long, Stock2_long, by = c("Date", "Variable"), suffixes = c(paste0("_", stockName1), paste0("_", stockName2)))
+#   
+# }
+# 
+# ```
+# 
+# ```{r}
+# joined_data1<-stock_join("data/nasdaq_prices/stocks/XOM.csv", "data/nasdaq_prices/stocks/SHW.csv")
+# ```
+# 
+# ```{r}
+# join_data_csv <- function(joined_data, csv) {
+#   options(scipen = 999)
+#   # Extract stock name from file path
+#   stockName <- str_extract(csv, "[^/]+(?=\\.csv$)")
+#   
+#   # Read in new stock .csv file
+#   new_stock <- read.csv(csv)
+#   
+#   # Add 'Company' column to the new dataset
+#   new_stock$Company <- stockName
+#   
+#   # Pivot data longer for the new stock dataset
+#   new_stock_long <- pivot_longer(new_stock, 
+#                                  cols = -c(Date, Company),  
+#                                  names_to = "Variable", 
+#                                  values_to = "Value")
+#   
+#   # Join the two datasets by date and variable
+#   completely_joined_data <- merge(new_stock_long, joined_data, by = c("Date", "Variable"), suffixes = c(paste0("_", stockName), ""))
+# }
+# 
+# ```
+# 
+# 
+# 
+# ```{r}
+# join_all<-function(csv1, csv2, csv3, csv4, csv5, csv6, csv7, csv8, csv9, csv10, csv11, csv12, csv13, csv14){
+#   #Joining all of the .csv files into one data set. Letters are just placeholders
+#   a<-join_data_csv(joined_data1, csv1)
+#   b<-join_data_csv(a, csv2)
+#   c<-join_data_csv(b, csv3)  
+#   d<-join_data_csv(c, csv4)
+#   e<-join_data_csv(d, csv5)
+#   f<-join_data_csv(e, csv6)
+#   g<-join_data_csv(f, csv7)  
+#   h<-join_data_csv(g, csv8)
+#   i<-join_data_csv(h, csv9)
+#   j<-join_data_csv(i, csv10)
+#   k<-join_data_csv(j, csv11)  
+#   l<-join_data_csv(k, csv12)
+#   m<-join_data_csv(l, csv13)
+#   n<-join_data_csv(m, csv14)
+#   return(n)
+# }
+# ```
+# 
+# ```{r}
+# #joining all .csv for final data set
+# Final_dataset<-join_all("data/nasdaq_prices/stocks/UPS.csv", "data/nasdaq_prices/stocks/MMM.csv", "data/nasdaq_prices/stocks/AEP.csv", "data/nasdaq_prices/stocks/UNH.csv", "data/nasdaq_prices/stocks/JPM.csv", "data/nasdaq_prices/stocks/AMZN.csv", "data/nasdaq_prices/stocks/MC.csv", "data/nasdaq_prices/stocks/KO.csv", "data/nasdaq_prices/stocks/PG.csv", "data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv", "data/nasdaq_prices/stocks/GOOG.csv", "data/nasdaq_prices/stocks/AMT.csv", "data/nasdaq_prices/stocks/SPG.csv")
 ```
 
-
 ```{r}
-#Comparing Inflation over time by month
+all_csvs<- c("data/nasdaq_prices/stocks/UPS.csv", "data/nasdaq_prices/stocks/MMM.csv", "data/nasdaq_prices/stocks/AEP.csv", "data/nasdaq_prices/stocks/UNH.csv", "data/nasdaq_prices/stocks/JPM.csv", "data/nasdaq_prices/stocks/AMZN.csv", "data/nasdaq_prices/stocks/MC.csv", "data/nasdaq_prices/stocks/KO.csv", "data/nasdaq_prices/stocks/PG.csv", "data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv", "data/nasdaq_prices/stocks/GOOG.csv", "data/nasdaq_prices/stocks/AMT.csv", "data/nasdaq_prices/stocks/SPG.csv", "data/nasdaq_prices/stocks/XOM.csv", "data/nasdaq_prices/stocks/SHW.csv")
+container <- vector("list", length(all_csvs))
 
-Inflation$Feb <- as.numeric(Inflation$Feb)
-
-
-Inflation1 <- pivot_longer(Inflation, cols = -Year, names_to = "Month", values_to = "Rate")
-
-Inflation1 <- Inflation1 %>% 
-  filter(Month != "Ave")
-
-# Define the order of months
-month_order <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-
-# Convert "Month" to factor with defined order
-Inflation1$Month <- factor(Inflation1$Month, levels = month_order)
-
-
-# Plotting
-ggplot(Inflation1, aes(x = Year, y = Rate)) +
-  geom_line() +
-  facet_wrap(~ Month, scales = "free_y", ncol = 4) +
-  labs(x = "Year", y = "Rate", title = "Rate by Month")
-```
-
-```{r}
-#Average inflation rate per year through time 
-ggplot(Inflation, aes(x=Year, y=Ave))+
-  geom_col()
-```
-
-```{r}
-#Read in data for apple
-Apple <- read.csv("data/nasdaq_prices/stocks/AAPL.csv")
-
-#Plot that shows open and closing prices as well as high and low
-ggplot(Apple, aes(x=Date))+
-  geom_linerange(aes(ymin=Low, ymax = High))
-```
-
-
-
-```{r}
-library(tidyr)
-library(stringr)
-library(tidyverse)
-library(dplyr)
-```
-
-
-```{r}
-#Function to join two .csv files
-
-
-stock_join <- function(csv1, csv2) {
-  options(scipen = 999)
-  # Extract stock names from file paths
-  stockName1 <- str_extract(csv1, "[^/]+(?=\\.csv$)")
-  stockName2 <- str_extract(csv2, "[^/]+(?=\\.csv$)")
-  
-  # Read in stock .csv files
-  Stock1 <- read.csv(csv1)
-  Stock2 <- read.csv(csv2)
-  
-  # Add 'Company' column to each dataset
-  Stock1$Company <- stockName1
-  Stock2$Company <- stockName2
-  
-  # Pivot data longer for stock1
-  Stock1_long <- pivot_longer(Stock1, 
-                              cols = -c(Date, Company),  
-                              names_to = "Variable", 
-                              values_to = "Value")
-  
-  # Pivot data longer for stock2
-  Stock2_long <- pivot_longer(Stock2, 
-                              cols = -c(Date, Company),  
-                              names_to = "Variable", 
-                              values_to = "Value")
-  
-  # Join the two datasets by date and variable
-  joined_data1 <- merge(Stock1_long, Stock2_long, by = c("Date", "Variable"), suffixes = c(paste0("_", stockName1), paste0("_", stockName2)))
-  
+clean_data <- function(path){
+  data<-read.csv(path)
+  stockName <- str_extract(path, "[^/]+(?=\\.csv$)")
+  data %>%
+    mutate(pRange = High - Low,
+           PriceDirection = ifelse(Open < Close, "Increase", ifelse(Open > Close, "Decrease", "No Change")),
+           DailyPricePercentage = ((Close - Open) / Open) * 100,
+           DailyPriceChange = Open - Close,
+           PriceVolatilityPercent = ((High - Low) / Open) * 100, 
+           ticker = stockName)
 }
 
-```
-
-```{r}
-joined_data1<-stock_join("data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv")
-```
-
-```{r}
-join_data_csv <- function(joined_data, csv) {
-  options(scipen = 999)
-  # Extract stock name from file path
-  stockName <- str_extract(csv, "[^/]+(?=\\.csv$)")
-  
-  # Read in new stock .csv file
-  new_stock <- read.csv(csv)
-  
-  # Add 'Company' column to the new dataset
-  new_stock$Company <- stockName
-  
-  # Pivot data longer for the new stock dataset
-  new_stock_long <- pivot_longer(new_stock, 
-                                 cols = -c(Date, Company),  
-                                 names_to = "Variable", 
-                                 values_to = "Value")
-  
-  # Join the two datasets by date and variable
-  completely_joined_data <- merge(new_stock_long, joined_data, by = c("Date", "Variable"), suffixes = c(paste0("_", stockName), ""))
+for (i in seq_along(all_csvs)){
+  cleaned_data <- clean_data(all_csvs[i])
+  container[[i]] <- cleaned_data
 }
-
+container <- container%>%
+  bind_rows()
 ```
-
-```{r}
-joined<-join_data_csv(joined_data1, "data/nasdaq_prices/stocks/XOM.csv")
-```
-
-```{r}
-join_all<-function(csv1, csv2, csv3, csv4, csv5, csv6, csv7, csv8, csv9, csv10, csv11, csv12, csv13){
-  #Joining all of the .csv files into one data set. Letters are just placeholders
-  a<-join_data_csv(joined, csv1)
-  b<-join_data_csv(a, csv2)
-  c<-join_data_csv(b, csv3)  
-  d<-join_data_csv(c, csv4)
-  e<-join_data_csv(d, csv5)
-  f<-join_data_csv(e, csv6)
-  g<-join_data_csv(f, csv7)  
-  h<-join_data_csv(g, csv8)
-  i<-join_data_csv(h, csv9)
-  j<-join_data_csv(i, csv10)
-  k<-join_data_csv(j, csv11)  
-  l<-join_data_csv(k, csv12)
-  m<-join_data_csv(l, csv13)
-  return(m)
-}
-```
-
-```{r}
-Final_dataset<-join_all("data/nasdaq_prices/stocks/SHW.csv", "data/nasdaq_prices/stocks/UPS.csv", "data/nasdaq_prices/stocks/AEP.csv", "data/nasdaq_prices/stocks/UNH.csv", "data/nasdaq_prices/stocks/JPM.csv", "data/nasdaq_prices/stocks/AMZN.csv", "data/nasdaq_prices/stocks/MCD.csv", "data/nasdaq_prices/stocks/KO.csv", "data/nasdaq_prices/stocks/PG.csv", "data/nasdaq_prices/stocks/FB.csv", "data/nasdaq_prices/stocks/GOOG.csv", "data/nasdaq_prices/stocks/AMT.csv", "data/nasdaq_prices/stocks/SPG.csv")
-```
-
 
 
