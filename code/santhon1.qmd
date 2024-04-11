@@ -2,6 +2,10 @@
 ```{r}
 library(readr)
 library(tidyverse)
+library(shiny)
+library(tidymodels)
+library(kknn)
+library(ISLR)
 ```
 
 
@@ -41,12 +45,53 @@ count(PriceDirection == "Increase")
 
 
 
-
-```{r}
-# Daily Price Change Over Time For XOM Stock. 
+```{r} 
 ggplot(data = XOM, aes(x = Date, y = Volume))+
-  geom_point()+
-  geom_smooth()+
+  geom_point() +
+  geom_smooth() +
   labs(title= "Exxon Mobil Volume Traded Over Time", x = "Date", y = "Volume")
 ```
+
+
+```{r}
+lasso_spec <- linear_reg() %>%             
+  set_mode("regression") %>% 
+  set_engine("glmnet") %>%                 
+  set_args(mixture = 1, penalty = tune())
+```
+
+
+```{r}
+variable_recipe <- recipe(Close ~ Volume + High + Low, data = XOM)
+```
+
+
+```{r}
+lasso_workflow <- workflow() %>% 
+  add_recipe(variable_recipe) %>% 
+  add_model(lasso_spec)
+```
+
+
+```{r}
+set.seed(253)
+lasso_models <- lasso_workflow %>% 
+  tune_grid(
+    grid = grid_regular(penalty(range = c(-50, 1)), levels = 100),  
+    resamples = vfold_cv(XOM, v = 10),   
+    metrics = metric_set(mae)
+  )
+
+lasso_models %>% 
+  collect_metrics()
+```
+
+```{r}
+autoplot(lasso_models) + 
+  scale_x_continuous() + 
+  xlab(expression(lambda)) + 
+  geom_errorbar(data = collect_metrics(lasso_models),
+                aes(x = penalty, ymin = mean - std_err, ymax = mean + std_err), alpha = 0.5)
+```
+
 
