@@ -2,6 +2,10 @@
 ```{r}
 library(readr)
 library(tidyverse)
+library(shiny)
+library(tidymodels)
+library(kknn)
+library(ISLR)
 ```
 
 
@@ -14,6 +18,11 @@ XOM <- read_csv("../data/nasdaq_prices/stocks/XOM.csv")
 GDPC1 <- read_csv("../data/GDPC1.csv")
 historicalinflation <- read_csv("../data/historicalinflationcalculator.csv")
 ```
+
+```{r}
+list = c("Industrials", "Industrials", "Utilities", "Healthcare", "Financials", "Consumer Discretionary", "Consumer Discretionary", "Consumer Staples", "Consumer Staples", "Information Technology", "Information Technology", "Communication Services", "Real Estate", "Real Estate", "Energy", "Materials")
+```
+
 
 
 ```{r}
@@ -41,12 +50,9 @@ count(PriceDirection == "Increase")
 
 
 
-
-```{r}
-# Daily Price Change Over Time For XOM Stock. 
+```{r} 
 ggplot(data = XOM, aes(x = Date, y = Volume))+
-  geom_point()+
-  geom_smooth()+
+  geom_point() +
+  geom_smooth() +
   labs(title= "Exxon Mobil Volume Traded Over Time", x = "Date", y = "Volume")
 ```
-
