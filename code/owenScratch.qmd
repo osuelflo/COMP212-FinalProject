@@ -1,0 +1,187 @@
+```{r,message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(TTR)
+library(plotly)
+library(gganimate)
+```
+
+```{r,message=FALSE}
+aapl <- read_csv("../data/nasdaq_prices/stocks/AAPL.csv")
+```
+
+```{r}
+# Using ttr
+ma_periods <- c(10,20,50,100,200)
+my_ema <- function(df,n,n2){
+  return(df %>% 
+           mutate(ema1 = EMA(df$Close,n=n),
+                  ema2 = EMA(df$Close,n=n2)))
+}
+my_sma <- function(df,n,n2){
+  return(df %>% 
+           mutate(sma1 = SMA(df$Close,n=n),
+                  sma2 = SMA(df$Close,n=n2)))
+}
+```
+
+
+```{r}
+tickerFiles <- data.frame(file_name = dir(path="../data/nasdaq_prices/stocks"),
+                          ticker = lapply(fnames,str_extract,pattern="^[:upper:]+"))
+```
+
+
+```{r}
+fnames <- dir(path="../data/nasdaq_prices/stocks")
+tickers <- lapply(fnames,str_extract,pattern="^[:upper:]+")
+my_ema_cross <- function(ema1_length,ema2_length){
+  fname <- fnames[1]
+  ticker <- tickers[1]
+  df <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+  df <- my_ema(df,ema1_length,ema2_length)
+  print(df %>% head())
+}
+
+my_ema_cross(10,50)
+```
+
+```{r}
+ma1 <- 10
+ma2 <- 50
+ticker <- "AAPL"
+
+my_ma_cross <- function(ticker,ma1,ma2){
+  prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv")) %>% 
+    my_sma(ma1,ma2) %>% 
+    select(Date,Close,sma1,sma2) %>%
+    drop_na()
+  curPrice <- prices$Close[1]
+  prevPrice <- 0
+  prevAccount <- 1000
+  account <- 1000
+  wins <- 0
+  losses <- 0
+  winsVec = rep(0,nrow(prices))
+  lossesVec = rep(0,nrow(prices))
+  accountVec = c(1000,rep(0,nrow(prices)-1))
+  buyVec = rep(FALSE,nrow(prices))
+  sellVec = rep(FALSE,nrow(prices))
+  pct_GainVec = rep(0,nrow(prices))
+  i <- 2
+  inTrade <- FALSE
+  while(i <= nrow(prices)){
+    close <- prices$Close[i]
+    curPrice <- close
+    s1 <- prices$sma1[i]
+    s2 <- prices$sma2[i]
+    if(inTrade){
+      account <- prevAccount * (curPrice/prevPrice)
+      if(s1 < s2){
+        inTrade <- FALSE
+        sellVec[i] <- TRUE
+        pct_GainVec[i] <- (account-prevAccount)/prevAccount*100
+        prevAccount <- account
+        if(curPrice > prevPrice){
+          wins <- wins + 1
+        }
+        else{
+          losses <- losses + 1
+        }
+      }
+    }
+    else{
+      if(s1 > s2 & prices$sma1[i-1] < prices$sma2[i-1]){
+        buyVec[i] <- TRUE
+        inTrade <- TRUE
+        prevPrice <- curPrice
+      }
+    }
+    winsVec[i] <- wins
+    lossesVec[i] <- losses
+    accountVec[i] <- account
+    i <- i+1
+  }
+  return(list(Prices = prices, Results = data.frame(Date = prices$Date,Wins = winsVec, Losses = lossesVec, AccountValue = accountVec, Buy = buyVec, Sell = sellVec,pctGain = pct_GainVec)))
+}
+
+
+```
+
+```{r}
+res <-my_ma_cross(ticker,ma1,ma2)
+res
+```
+
+# What to include:
+### Plots
+1. Time series plot of stock price
+  - Basic line chart (each point is closing price)
+  - Both moving averages
+  - Date nicely formatted at the bottom
+  - Vertical line indicating what date it is (?)
+  - Green Triangle on plot to indicate trade was taken
+  - Red triangle on plot to indicate when we sold
+2. Time series plot of account value
+3. Table that shows overall PnL, wins, losses, win percentage
+
+
+```{r}
+prices <- res[[1]]
+results <- res[[2]]
+combined <- prices %>% 
+  left_join(results, by='Date')
+combined
+```
+
+```{r}
+ticker <- "AAPL"
+SMA1 <- 10
+SMA2 <- 50
+buys <- combined %>% 
+  filter(Buy==TRUE) %>% 
+  select(Date,AccountValue,sma1)
+sells <- combined %>% 
+  filter(Sell==TRUE) %>% 
+  select(Date,AccountValue,sma1)
+p<- ggplot()+
+  geom_line(aes(x = combined$Date,y = combined$Close, color = 'black'))+
+  geom_line(aes(x = combined$Date,y=combined$sma1,color='blue'))+
+  geom_line(aes(x = combined$Date,y=combined$sma2,color = 'orange'))+
+  geom_point(aes(x = sells$Date,y=sells$sma1),shape=4,size=2,color="red")+
+  geom_point(aes(x = buys$Date,y=buys$sma1),shape=4,size=2,color="green")+
+  labs(color = "Line Type",y="Price",x="Date",title=str_glue("{ticker} Chart"))+
+  ylim(c(0,max(combined$Close)*4))+
+  scale_color_manual(values = c('black',"blue", "orange"),
+    labels = c(str_glue('{ticker} Price'),str_glue('{SMA1} SMA'),str_glue('{SMA2} SMA')))+
+  theme_minimal()
+p
+ggplotly(p)
+```
+
+```{r}
+p<-combined %>% 
+  ggplot()+
+  geom_line(aes(x=Date,y=AccountValue))+
+  # geom_point(aes(x = sells$Date,y=sells$AccountValue),shape=4,size=2,color="red")+
+  # geom_point(aes(x = buys$Date,y=buys$AccountValue),shape=4,size=2,color="green")+
+  labs(x = "Date",y="Account Value",title="Profit Using Basic MA Crossover Strategy",subtitle="Starting with $1000, and putting whole account into each trade")+
+  theme_minimal()
+p+
+  transition_reveal(Date)
+```
+
+```{r}
+totals<-results[nrow(results),]
+totals<-totals %>% 
+  mutate(TotalTrades = Wins+Losses,
+         WinPct = Wins/(Losses+Wins),
+         AvgPctGain = sum(results$pctGain)/TotalTrades) %>%
+  select(TotalTrades,Wins,Losses,WinPct,AccountValue,AvgPctGain)
+totals
+```
+
+
+
+
+
