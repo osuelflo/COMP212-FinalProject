@@ -3,12 +3,10 @@ library(ggplot2)
 library(tidyverse)
 library(TTR)
 library(plotly)
-library(gganimate)
+library(rvest)
 ```
 
-```{r,message=FALSE}
-aapl <- read_csv("../data/nasdaq_prices/stocks/AAPL.csv")
-```
+
 
 ```{r}
 # Using ttr
@@ -27,47 +25,63 @@ my_sma <- function(df,n,n2){
 
 
 ```{r}
-tickerFiles <- data.frame(file_name = dir(path="../data/nasdaq_prices/stocks"),
-                          ticker = lapply(fnames,str_extract,pattern="^[:upper:]+"))
-```
-
-
-```{r}
 fnames <- dir(path="../data/nasdaq_prices/stocks")
 tickers <- lapply(fnames,str_extract,pattern="^[:upper:]+")
-my_ema_cross <- function(ema1_length,ema2_length){
-  fname <- fnames[1]
-  ticker <- tickers[1]
-  df <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
-  df <- my_ema(df,ema1_length,ema2_length)
-  print(df %>% head())
-}
-
-my_ema_cross(10,50)
 ```
 
 ```{r}
-ma1 <- 10
-ma2 <- 50
-ticker <- "AAPL"
+my_spy_hold <- function(date=NA,filterDate=FALSE){
+  if(filterDate){
+    prices <- read_csv(str_glue("../data/nasdaq_prices/etfs/SPY.csv")) %>% 
+      filter(Date >= date) %>% 
+      select(Date,Close)
+  }
+  else{
+    prices <- read_csv(str_glue("../data/nasdaq_prices/etfs/SPY.csv")) %>% 
+      select(Date,Close)
+  }
+  i <- 2
+  accountValVec <- rep(0,nrow(prices))
+  accountValue <- 1000
+  accountValVec[1] <- 1000
+  prevPrice <- prices$Close[1]
+  while(i <= nrow(prices)){
+    curPrice <- prices$Close[i]
+    accountValue <- 1000 * (curPrice/prevPrice)
+    accountValVec[i] <- accountValue
+  }
+  return(data.frame(Date = prices$Date,AccountValue = accountValVec))
+}
 
-my_ma_cross <- function(ticker,ma1,ma2){
-  prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv")) %>% 
-    my_sma(ma1,ma2) %>% 
-    select(Date,Close,sma1,sma2) %>%
-    drop_na()
+
+my_ma_cross <- function(ticker,ma1,ma2,date=NA,filterDate=FALSE){
+  if(filterDate){
+    prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv")) %>% 
+      filter(Date >=date) %>% 
+      my_sma(ma1,ma2) %>% 
+      select(Date,Close,sma1,sma2) %>%
+      drop_na()
+  }
+  else{
+    prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv")) %>% 
+      my_sma(ma1,ma2) %>% 
+      select(Date,Close,sma1,sma2) %>%
+      drop_na()
+  }
   curPrice <- prices$Close[1]
   prevPrice <- 0
-  prevAccount <- 1000
+  prevHoldPrice <- curPrice
   account <- 1000
+  holdAccount <- 1000
   wins <- 0
   losses <- 0
-  winsVec = rep(0,nrow(prices))
-  lossesVec = rep(0,nrow(prices))
-  accountVec = c(1000,rep(0,nrow(prices)-1))
-  buyVec = rep(FALSE,nrow(prices))
-  sellVec = rep(FALSE,nrow(prices))
-  pct_GainVec = rep(0,nrow(prices))
+  winsVec <- rep(0,nrow(prices))
+  lossesVec <- rep(0,nrow(prices))
+  holdAccountVec <- c(1000,rep(0,nrow(prices)-1))
+  accountVec <- c(1000,rep(0,nrow(prices)-1))
+  buyVec <- rep(FALSE,nrow(prices))
+  sellVec <- rep(FALSE,nrow(prices))
+  pct_GainVec <- rep(0,nrow(prices))
   i <- 2
   inTrade <- FALSE
   while(i <= nrow(prices)){
@@ -75,6 +89,8 @@ my_ma_cross <- function(ticker,ma1,ma2){
     curPrice <- close
     s1 <- prices$sma1[i]
     s2 <- prices$sma2[i]
+    holdAccount <- 1000 * (curPrice/prevHoldPrice)
+    holdAccountVec[i] <- accountValue
     if(inTrade){
       account <- prevAccount * (curPrice/prevPrice)
       if(s1 < s2){
@@ -102,16 +118,298 @@ my_ma_cross <- function(ticker,ma1,ma2){
     accountVec[i] <- account
     i <- i+1
   }
-  return(list(Prices = prices, Results = data.frame(Date = prices$Date,Wins = winsVec, Losses = lossesVec, AccountValue = accountVec, Buy = buyVec, Sell = sellVec,pctGain = pct_GainVec)))
+  return(list(Prices = prices, Results = data.frame(Date = prices$Date,Wins = winsVec, Losses = lossesVec, AccountValue = accountVec, Buy = buyVec, Sell = sellVec,pctGain = pct_GainVec,HoldAccountValue=holdAccountVec)))
 }
 
 
 ```
 
+
+
 ```{r}
-res <-my_ma_cross(ticker,ma1,ma2)
+my_part_ma_cross <- function(ticker){
+  winsVec <- rep(0,250)
+  lossesVec <- rep(0,250)
+  totalTradesVec <- rep(0,250)
+  accountVec <- rep(0,250)
+  pct_GainVec <- rep(0,250)
+  ma1Vec <- rep(0,250)
+  ma2Vec <- rep(0,250)
+  winRateVec <- rep(0,250)
+  j<- 1
+  p <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+  for(ma1 in seq(from=5,to=50,by=5)){
+    for(ma2 in seq(from=1.2,to=6,by=0.2)){
+      prices <- p %>% 
+        my_sma(ma1,round(ma1*ma2)) %>% 
+        select(Date,Close,sma1,sma2) %>%
+        drop_na()
+      curPrice <- prices$Close[1]
+      prevPrice <- 0
+      prevAccount <- 1000
+      account <- 1000
+      wins <- 0
+      losses <- 0
+      pctGain <- 0
+      i <- 2
+      inTrade <- FALSE
+      while(i <= nrow(prices)){
+        close <- prices$Close[i]
+        curPrice <- close
+        s1 <- prices$sma1[i]
+        s2 <- prices$sma2[i]
+        if(inTrade){
+          account <- prevAccount * (curPrice/prevPrice)
+          if(s1 < s2){
+            inTrade <- FALSE
+            pctGain <- pctGain+(account-prevAccount)/prevAccount*100
+            prevAccount <- account
+            if(curPrice > prevPrice){
+              wins <- wins + 1
+            }
+            else{
+              losses <- losses + 1
+            }
+          }
+        }
+        else{
+          if(s1 > s2 & prices$sma1[i-1] < prices$sma2[i-1]){
+            inTrade <- TRUE
+            prevPrice <- curPrice
+          }
+        }
+        i <- i+1
+      }
+      winsVec[j] <- wins
+      lossesVec[j] <- losses
+      totalTradesVec[j] <- wins+losses
+      accountVec[j] <- account
+      pct_GainVec[j] <- pctGain/(wins+losses)
+      ma1Vec[j] <- ma1
+      ma2Vec[j] <- ma2
+      winRateVec[j] <- wins/(wins+losses)*100
+      print(j)
+      j<-j+1
+    }
+  }
+  return(data.frame(MA1 = ma1Vec,
+                    MA2 = ma2Vec,
+                    Wins = winsVec,
+                    Losses = lossesVec,
+                    AccountValue = accountVec,
+                    AvgPctGain = pct_GainVec,
+                    WinRate = winRateVec))
+}
+```
+
+
+```{r}
+my_all_ma_cross <- function(ticker){
+  winsVec <- rep(0,14161)
+  lossesVec <- rep(0,14161)
+  totalTradesVec <- rep(0,14161)
+  accountVec <- rep(0,14161)
+  pct_GainVec <- rep(0,14161)
+  ma1Vec <- rep(0,14161)
+  ma2Vec <- rep(0,14161)
+  winRateVec <- rep(0,14161)
+  j<- 1
+  p <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+  for(ma1 in seq(from=5,to=100,by=1)){
+    for(ma2 in seq(from=ma1+1,to=200,by=1)){
+      prices <- p %>% 
+        my_sma(ma1,ma2) %>% 
+        select(Date,Close,sma1,sma2) %>%
+        drop_na()
+      curPrice <- prices$Close[1]
+      prevPrice <- 0
+      prevAccount <- 1000
+      account <- 1000
+      wins <- 0
+      losses <- 0
+      pctGain <- 0
+      i <- 2
+      inTrade <- FALSE
+      while(i <= nrow(prices)){
+        close <- prices$Close[i]
+        curPrice <- close
+        s1 <- prices$sma1[i]
+        s2 <- prices$sma2[i]
+        if(inTrade){
+          account <- prevAccount * (curPrice/prevPrice)
+          if(s1 < s2){
+            inTrade <- FALSE
+            pctGain <- pctGain+(account-prevAccount)/prevAccount*100
+            prevAccount <- account
+            if(curPrice > prevPrice){
+              wins <- wins + 1
+            }
+            else{
+              losses <- losses + 1
+            }
+          }
+        }
+        else{
+          if(s1 > s2 & prices$sma1[i-1] < prices$sma2[i-1]){
+            inTrade <- TRUE
+            prevPrice <- curPrice
+          }
+        }
+        i <- i+1
+      }
+      winsVec[j] <- wins
+      lossesVec[j] <- losses
+      totalTradesVec[j] <- wins+losses
+      accountVec[j] <- account
+      pct_GainVec[j] <- pctGain/(wins+losses)
+      ma1Vec[j] <- ma1
+      ma2Vec[j] <- ma2
+      winRateVec[j] <- wins/(wins+losses)*100
+      print(j)
+      j<-j+1
+    }
+  }
+  return(data.frame(MA1 = ma1Vec,
+                    MA2 = ma2Vec,
+                    Wins = winsVec,
+                    Losses = lossesVec,
+                    AccountValue = accountVec,
+                    AvgPctGain = pct_GainVec,
+                    WinRate = winRateVec))
+}
+```
+
+```{r}
+res2<- my_part_ma_cross("TSLA")
+res2
+```
+
+
+```{r}
+res <-my_all_ma_cross("AAPL")
 res
 ```
+
+```{r}
+res %>% 
+ggplot()+
+  geom_point(aes(x=MA1,y=MA2,color=log10(AccountValue)),size=0.2)+
+  scale_color_viridis_b()+
+  xlim(c(5,200))+
+  theme_minimal()
+res %>% 
+ggplot()+
+  geom_point(aes(x=MA1,y=MA2,color=AvgPctGain),size=0.2)+
+  scale_color_viridis_b()+
+  xlim(c(5,200))+
+  theme_minimal()
+res %>% 
+ggplot()+
+  geom_point(aes(x=MA1,y=MA2,color=WinRate),size=0.2)+
+  scale_color_viridis_b()+
+  xlim(c(5,200))+
+  theme_minimal()
+```
+
+
+```{r}
+res2 %>% 
+ggplot()+
+  geom_tile(aes(x=MA1,y=MA2,fill=log10(AccountValue)))+
+  scale_fill_viridis_b()+
+  theme_minimal()
+res2 %>% 
+ggplot()+
+  geom_tile(aes(x=MA1,y=MA2,fill=AvgPctGain))+
+  scale_fill_viridis_b()+
+  theme_minimal()
+res2 %>% 
+ggplot()+
+  geom_tile(aes(x=MA1,y=MA2,fill=WinRate))+
+  scale_fill_viridis_b()+
+  theme_minimal()
+```
+
+
+# More things to add
+### Shiny app stuff
+1. Add another tab that explores different combinations of moving averages for a given ticker
+2. Add another tab that explores viability of strategy across sectors
+3. Add another tab that explores viability of strategy for different market environments
+### Overall analysis
+1. Make a couple MA combination plots for all possible combos, for a couple different stocks
+2. Take a couple popular combinations and run the strategy for every ticker, comparing results across sectors and market environments
+3. Incorporate annual market returns into analysis to see if strategy can beat the market
+
+```{r}
+my_sectors <- function(){
+  tickers <- rep(NA,110)
+  sectorVec <- rep(NA,110)
+  j <- 0
+  for(sec in sectors){
+    print(sec)
+    url <- str_glue("https://stockanalysis.com/stocks/sector/{sec}")
+    page <- read_html(url)
+    res<-page %>% 
+    html_elements("td") %>% 
+    html_text()
+    for(i in 1:10){
+      tickers[10*j+i] <- res[2+7*(i-1)]
+      sectorVec[10*j+i] <- sec
+    }
+    j<- j+1
+  }
+  return(data.frame(Ticker=tickers,Sector=sectorVec))
+}
+
+find_min_date <- function(stocks){
+  df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  date <- df$Date[1]
+  for(i in 2:10){
+    df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    date2 <- df$Date[1]
+    if(date2 > date){
+      date <- date2
+    }
+  }
+  return(date)
+}
+
+my_profit_sectors <- function(sector,ma1,ma2){
+  tickers <- res %>% filter(Sector == sector)
+  stocks <- tickers$Ticker
+  dfs <- rep(NA,10)
+  date <- find_min_date(stocks)
+  res1 <- my_ma_cross(stocks[1],ma1,ma2,date,filterDate = TRUE)$Results %>% 
+    select(Date,AccountValue)
+  for(i in 2:10){
+    res2<-my_ma_cross(stocks[i],ma1,ma2,date,filterDate = TRUE)$Results
+    res1$AccountValue <- res1$AccountValue + res2$AccountValue
+  }
+  return(res1)
+}
+```
+
+
+```{r,message=FALSE}
+mysector <- "technology"
+prof <- my_profit_sectors(mysector,15,50)
+```
+
+```{r}
+# Sector plots
+# 1. Profit over time
+# 2. Table for overall stats
+
+p<-prof %>% 
+  ggplot()+
+  geom_line(aes(x=Date,y=AccountValue))+
+  labs(x = "Date",y="Account Value",title="Profit Using Basic MA Crossover Strategy",subtitle="Starting with $1000, and putting whole account into each trade")+
+  theme_minimal()
+p
+
+```
+
 
 # What to include:
 ### Plots
@@ -125,7 +423,9 @@ res
 2. Time series plot of account value
 3. Table that shows overall PnL, wins, losses, win percentage
 
-
+Still to add:
+  Add sector and multiple MA components to shiny app
+  update all profit plots to include the value of the account if you just held the stock throughout whole period, as well as just holding SPY
 ```{r}
 prices <- res[[1]]
 results <- res[[2]]
@@ -156,15 +456,13 @@ p<- ggplot()+
     labels = c(str_glue('{ticker} Price'),str_glue('{SMA1} SMA'),str_glue('{SMA2} SMA')))+
   theme_minimal()
 p
-ggplotly(p)
+ggplotly(p,dynamicTicks = TRUE)
 ```
 
 ```{r}
 p<-combined %>% 
   ggplot()+
   geom_line(aes(x=Date,y=AccountValue))+
-  # geom_point(aes(x = sells$Date,y=sells$AccountValue),shape=4,size=2,color="red")+
-  # geom_point(aes(x = buys$Date,y=buys$AccountValue),shape=4,size=2,color="green")+
   labs(x = "Date",y="Account Value",title="Profit Using Basic MA Crossover Strategy",subtitle="Starting with $1000, and putting whole account into each trade")+
   theme_minimal()
 p+
