@@ -6,6 +6,26 @@ library(plotly)
 library(rvest)
 ```
 
+```{r}
+bac<-read_csv("../data/nasdaq_prices/stocks/BAC.csv")
+bad <-which(is.na(bac))
+bad
+# bad % nrow(bac)
+nrow(bac)
+bad %% 11885
+bac[5630,]
+unique(bad %% 11885)
+```
+
+
+```{r}
+fix_na <- function(df){
+  bad <-which(is.na(df))
+  bad2 <- unique(bad %% nrow(df))
+  df[bad2,] <- df[bad2-1,]
+  return(df)
+}
+```
 
 
 ```{r}
@@ -29,6 +49,12 @@ fnames <- dir(path="../data/nasdaq_prices/stocks")
 tickers <- lapply(fnames,str_extract,pattern="^[:upper:]+")
 ```
 
+
+```{r}
+my_spy_hold()
+```
+
+
 ```{r}
 my_spy_hold <- function(date=NA,filterDate=FALSE){
   if(filterDate){
@@ -49,6 +75,7 @@ my_spy_hold <- function(date=NA,filterDate=FALSE){
     curPrice <- prices$Close[i]
     accountValue <- 1000 * (curPrice/prevPrice)
     accountValVec[i] <- accountValue
+    i<- i +1
   }
   return(data.frame(Date = prices$Date,AccountValue = accountValVec))
 }
@@ -380,12 +407,18 @@ my_profit_sectors <- function(sector,ma1,ma2){
   stocks <- tickers$Ticker
   dfs <- rep(NA,10)
   date <- find_min_date(stocks)
-  res1 <- my_ma_cross(stocks[1],ma1,ma2,date,filterDate = TRUE)$Results %>% 
-    select(Date,AccountValue)
+  res1 <- my_collapse_table(my_ma_cross(stocks[1],ma1,ma2,date,filterDate = TRUE)$Results)
+  res1$AvgPctGain <- res1$AvgPctGain*res1$TotalTrades
   for(i in 2:10){
-    res2<-my_ma_cross(stocks[i],ma1,ma2,date,filterDate = TRUE)$Results
+    res2<-my_collapse_table(my_ma_cross(stocks[i],ma1,ma2,date,filterDate = TRUE)$Results)
     res1$AccountValue <- res1$AccountValue + res2$AccountValue
+    res1$TotalTrades <- res1$TotalTrades + res2$TotalTrades
+    res1$Wins <- res1$Wins + res2$Wins
+    res1$Losses <- res1$Losses + res2$Losses
+    res1$AvgPctGain <- res1$AvgPctGain + res2$AvgPctGain*res2$TotalTrades
   }
+  res1$WinPct <- res1$Wins/res1$TotalTrades*100
+  res1$AvgPctGain <- res1$AvgPctGain/res1$TotalTrades*100
   return(res1)
 }
 ```

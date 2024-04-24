@@ -9,7 +9,6 @@ ORCL,technology
 CRM,technology
 AMD,technology
 SAP,technology
-BRK.B,financials
 JPM,financials
 V,financials
 MA,financials
@@ -17,7 +16,6 @@ BAC,financials
 WFC,financials
 AXP,financials
 HSBC,financials
-MS,financials
 BX,financials
 LLY,healthcare
 NVO,healthcare
@@ -42,7 +40,6 @@ BKNG,consumer-discretionary
 CAT,industrials
 GE,industrials
 UNP,industrials
-RTX,industrials
 HON,industrials
 UPS,industrials
 ETN,industrials
@@ -50,7 +47,7 @@ LMT,industrials
 DE,industrials
 BA,industrials
 GOOGL,communication-services
-META,communication-services
+FB,communication-services
 NFLX,communication-services
 DIS,communication-services
 TMUS,communication-services
@@ -71,13 +68,9 @@ MDLZ,consumer-staples
 DEO,consumer-staples
 XOM,energy
 CVX,energy
-SHEL,energy
-TTE,energy
 COP,energy
 BP,energy
 PBR,energy
-PBR.A,energy
-CNQ,energy
 EQNR,energy
 LIN,materials
 BHP,materials
@@ -102,10 +95,8 @@ CSGP,real-estate
 NEE,utilities
 SO,utilities
 DUK,utilities
-CEG,utilities
 NGG,utilities
 SRE,utilities
 AEP,utilities
 D,utilities
-GEV,utilities
 EXC,utilities
