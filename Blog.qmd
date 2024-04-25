@@ -8,12 +8,26 @@ output:
     highlight: tango
 ---
 
-```{r,message=FALSE}
-library(ggplot2)
-library(tidyverse)
-library(TTR)
-library(plotly)
-library(rvest)
+```{=html}
+<style type="text/css">
+/* Whole document: */
+body{
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-size: 12pt;
+}
+h1.title {
+  font-size: 38px;
+  text-align: center;
+}
+h4.author {
+  font-size: 18px;
+  text-align: center;
+}
+h4.date {
+  font-size: 18px;
+  text-align: center;
+}
+</style>
 ```
 
 ```{r include = FALSE}
@@ -27,6 +41,16 @@ knitr::opts_chunk$set(
   fig.align = 'center')
 ```
 
+```{r,message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(TTR)
+library(plotly)
+library(rvest)
+library(dplyr)
+library(tidyr)
+```
+
 ## Introduction
 
 # Question/Goal
@@ -37,4 +61,14 @@ How can we best advise someone with common stock knowledge to help them succeed 
 
   It's no secret that trading stocks have proven complicated and challenging. Many people gain tremendous fortunes, while others lose everything. Traders utilize many strategies to help them make the most of their invested money in the market. There are countless strategies that could be utilized, as each trader could have their own strategy, but there are also well-known strategies. According to Investopedia, there are four common trend trading strategies: Moving Averages, Moving Averages Convergence Divergence (MACD), Relative Strength Index (RSI), and On-Balance Volume (OBV) (Mitchell, 2024). For the purposes of this analysis, we chose to analyze Moving Averages. Moving Averages use a small and large number of daily averages to help predict the stock market trends and help traders know when to buy or sell a particular stock. Both the large and small numbers represent the daily average of previous days. For example, if the smaller average were 20, we would average the 20 days prior to the current day. The trader can use any set of numbers when determining the length of the averages. Some traders opt to use shorter periods, while others opt for more extended periods to see longer averages and trends in the market. Using our shiny app, we explore the best ways to utilize the Moving Averages strategy and how traders can best spend their money to make more money. 
   
+# Data Background 
+
+Sectors
+
+- Scraped from stockanalysis.com
+- Chose the 6-10 largest stocks per sector
+
+
+
   
+talk about limitations and to not use our analysis to make life changing money decisions
