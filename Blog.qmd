@@ -1,0 +1,40 @@
+---
+title: "Exploring the Moving Averages Method for Stocks"
+author: "Jacob Posner, Owen Suelflow, Sam Anthony"
+date: "2024-05-1"
+output: 
+  html_document:
+    theme: sandstone
+    highlight: tango
+---
+
+```{r,message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(TTR)
+library(plotly)
+library(rvest)
+```
+
+```{r include = FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  collapse = TRUE, 
+  echo = FALSE, 
+  fig.height = 3, 
+  fig.width = 5,
+  fig.align = 'center')
+```
+
+## Introduction
+
+# Question/Goal
+
+How can we best advise someone with common stock knowledge to help them succeed in making money using the Moving Averages strategy?
+
+# Background and Motivation
+
+  It's no secret that trading stocks have proven complicated and challenging. Many people gain tremendous fortunes, while others lose everything. Traders utilize many strategies to help them make the most of their invested money in the market. There are countless strategies that could be utilized, as each trader could have their own strategy, but there are also well-known strategies. According to Investopedia, there are four common trend trading strategies: Moving Averages, Moving Averages Convergence Divergence (MACD), Relative Strength Index (RSI), and On-Balance Volume (OBV) (Mitchell, 2024). For the purposes of this analysis, we chose to analyze Moving Averages. Moving Averages use a small and large number of daily averages to help predict the stock market trends and help traders know when to buy or sell a particular stock. Both the large and small numbers represent the daily average of previous days. For example, if the smaller average were 20, we would average the 20 days prior to the current day. The trader can use any set of numbers when determining the length of the averages. Some traders opt to use shorter periods, while others opt for more extended periods to see longer averages and trends in the market. Using our shiny app, we explore the best ways to utilize the Moving Averages strategy and how traders can best spend their money to make more money. 
+  
+  

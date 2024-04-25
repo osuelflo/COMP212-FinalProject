@@ -58,9 +58,36 @@ stock_data_joined<-stock_data %>%
 
 
 ```{r}
-ggplot(stock_data_joined, aes(x=Inflation, y=DailyPricePercentage))+
+ggplot(stock_data_joined, aes(x=Inflation, y=DailyPriceChange))+
   geom_point()+
   facet_wrap(~Sector)
 
+```
+
+```{r}
+stock_data_joined %>% 
+  group_by(Sector, Year) %>% 
+  summarize(mean = mean(Close, na.rm = TRUE)) %>% 
+  filter(!is.na(Sector)) %>% 
+  ggplot(aes(x=Year, y=mean))+
+  geom_point()+
+  facet_wrap(~Sector)+
+  theme_minimal()+
+  labs(x = "Year", y = "Mean Closing Price", title = "Mean Closing Price per Sector by Year")+
+  theme(panel.spacing = unit(1, "lines"))
+```
+
+```{r, fig.width=15}
+stock_data_joined %>%
+  group_by(Sector, Month) %>%
+  summarise(mean_prange = mean(pRange, na.rm = TRUE)) %>% 
+  filter(!is.na(Sector)) %>% 
+  mutate(Month = fct_relevel(Month, month.abb)) %>% 
+  ggplot(aes(x=Month, y=mean_prange))+
+  geom_point()+
+  facet_wrap(~Sector)+
+  theme_minimal()+
+  labs(x= "Months", y = "Mean Price Range", title = "Mean Price Range per Month by Sector")+
+  theme(panel.spacing = unit(1, "lines"))
 ```
 
