@@ -363,7 +363,9 @@ ui <- fluidPage(tabsetPanel(id="tabs",tabPanel("Pick MA Combination", value = "t
 ) 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  res<-reactive({
+  res<-reactive({ # Results for the first tab
+    
+    # All the validate statements will make sure that valid entries are given for each of the user inputs
     validate(
       need(input$ticker %in% tickers, "Please enter a valid ticker as of 2020")
     )
@@ -379,26 +381,27 @@ server <- function(input, output) {
     my_ma_cross(input$ticker,input$sma1,input$sma2)
   })
   
-  prices <- reactive({
+  # Everything must be in a reactive context in order for the app to change depending on user input
+  prices <- reactive({ # Price dataframe for the interactive viz on top of first tab
     res()[[1]]})
-  results <- reactive({
+  results <- reactive({ # Results dataframe for the table and plot on bottom of first tab
     res()[[2]]})
   combined <- reactive({
     prices() %>% 
     left_join(results(), by='Date')})
-  buys <- reactive({
+  buys <- reactive({ # Getting dates when stocks were bought to include for interactive viz on first tab
     combined() %>% 
     filter(Buy==TRUE) %>% 
     select(Date,AccountValue,sma1)})
-  sells <- reactive({
+  sells <- reactive({ # Getting dates when stocks were sold to include for interactive viz on first tab
     combined() %>% 
     filter(Sell==TRUE) %>% 
     select(Date,AccountValue,sma1)})
-  spy1 <- reactive({
+  spy1 <- reactive({ # Getting data on holding SPY for date depending on ticker chosen by user for first tab
     d <- combined()$Date[1]
     my_spy_hold(date=combined()$Date[1],filterDate = TRUE)
   })
-  ma_comb <- reactive({
+  ma_comb <- reactive({ # All data needed for visualizations in second tab
     if(input$ticker2 == ""){
       if(input$ticker == ""){
         validate(
@@ -417,7 +420,7 @@ server <- function(input, output) {
     }
   })
   
-  sector_results <- reactive({
+  sector_results <- reactive({ # Sector data for results of strategy by sector for third tab
     validate(
       need(input$sect_sma1 < input$sect_sma2, "The longer timeframe SMA must be longer than the shorter timeframe SMA")
     )
@@ -433,7 +436,7 @@ server <- function(input, output) {
     my_stocks_sector(input$sector)
   })
   
-  spy2 <- reactive({
+  spy2 <- reactive({ # Getting data on holding SPY for date depending on ticker chosen by user for first tab
     temp <- sector_results()$Profit
     d <- temp$Date[1]
     my_spy_hold(date=d,filterDate = TRUE)
@@ -441,7 +444,7 @@ server <- function(input, output) {
   
   
   
-  output$chart <- renderPlotly({
+  output$chart <- renderPlotly({ # First viz on first tab
     p<- ggplot()+
       geom_line(data=combined(),aes(x = Date,y = Close, color = 'black'))+
       geom_line(data=combined(),aes(x = Date,y=sma1,color='blue'))+
@@ -456,7 +459,7 @@ server <- function(input, output) {
     ggplotly(p,dynamicTicks = TRUE)
   })
   
-  output$profit <- renderPlot({
+  output$profit <- renderPlot({ # Profit graph on bottom of first tab
     p2<- ggplot()+
       geom_line(data = combined(),aes(x=Date,y=AccountValue,color="black"))+
       geom_line(data = combined(),aes(x=Date,y=HoldAccountValue,color="orange"))+
@@ -468,12 +471,12 @@ server <- function(input, output) {
     p2
   })
   
-  output$results <- renderTable({
+  output$results <- renderTable({ # Table on bottom of first tab
     my_collapse_table(results())
   })
   
   
-  output$accountValue <- renderPlot({
+  output$accountValue <- renderPlot({ # Account value heatmap in second tab
     ma_comb() %>% 
       ggplot()+
       geom_tile(aes(x=MA1,y=MA2,fill=log10(AccountValue)))+
@@ -486,7 +489,7 @@ server <- function(input, output) {
       theme_classic()
   })
   
-  output$winRate <- renderPlot({
+  output$winRate <- renderPlot({ # Win rate heatmap in second tab
     ma_comb() %>% 
       ggplot()+
       geom_tile(aes(x=MA1,y=MA2,fill=AvgPctGain))+
@@ -498,7 +501,7 @@ server <- function(input, output) {
       theme_classic()
   })
   
-  output$avgPctGain <- renderPlot({
+  output$avgPctGain <- renderPlot({ # Average pct gain heatmap in second tab
     ma_comb() %>% 
       ggplot()+
       geom_tile(aes(x=MA1,y=MA2,fill=WinRate))+
@@ -510,7 +513,7 @@ server <- function(input, output) {
       theme_classic()
   })
   
-  output$sectorProfit <- renderPlot({
+  output$sectorProfit <- renderPlot({ # Sector profit chart in third tab
     prof <- sector_results()$Profit
     sp <- spy2() %>% filter(Date >= prof$Date[1])
     val <-1000*nrow(sector_stocks())
@@ -525,11 +528,11 @@ server <- function(input, output) {
     p2
   })
   
-  output$sectorResults <- renderTable({
+  output$sectorResults <- renderTable({ # Sector results in third tab
     sector_results()$Results
   })
   
-  output$sectorStocks <- renderTable({
+  output$sectorStocks <- renderTable({ # List of stocks in sector displayed in sidebar of third tab
     sector_stocks()
   })
   
