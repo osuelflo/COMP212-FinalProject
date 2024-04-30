@@ -65,10 +65,20 @@ How can we best advise someone with common stock knowledge to help them succeed 
 
 Sectors
 
+- Global Industry Classification Standards for stock market sectors (GICS)
+- As of 2022, there are 11 sectors 
 - Scraped from stockanalysis.com
-- Chose the 6-10 largest stocks per sector
+- Chose six to ten of the largest stocks per sector
+- Wanted to choose enough stocks to represent the market in the best possible way. 
 
+Nasdaq Prices
 
+- Included data on all ETFs (Exchange-Traded Fund) and Stocks
+- Data found on Kaggle.com
 
-  
-talk about limitations and to not use our analysis to make life changing money decisions
+# Data Engagement
+
+The data we found was clean and complete, allowing us to perform a full analysis. The data were found from ethical websites trusted by the data science community. One should be careful trying to model stock data because all of the data is relatively correlated. There are many considerations when interpreting stock data, so a trader must be careful where they spend their money. Because we are advising our audience on a particular trading strategy, it is imperative that the data we use is accurate and provides quality information to the audience. A misinterpretation of data or analysis could potentially lead the audience to waste money on certain stocks or trades at the wrong time if not appropriately understood. These consequences can be mitigated by ensuring our audience understands the data and our analysis in full depth before making potential life-changing decisions to buy or sell stock. 
+
+Simply using moving averages doesn’t necessarily guarantee a trader will make money. Tradethatswing.com claims, “Yes and no. Putting a moving average on a chart and then taking random trades based on it isn’t going to generate consistent returns.” This claim is backed by our analysis, which shows that we often lose money on our trades more than half of the time. Traders can refer to websites like https://www.sec.gov/about/reports-publications/investor-publications/day-trading-your-dollars-at-risk, which discusses potential risks when trading and urges traders to be careful when making trades. Our team has no prior experience using moving averages but notes the potential success behind it and the potential risks. 
+

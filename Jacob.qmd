@@ -91,3 +91,5 @@ stock_data_joined %>%
   theme(panel.spacing = unit(1, "lines"))
 ```
 
+
+
