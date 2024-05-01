@@ -51,17 +51,17 @@ library(dplyr)
 library(tidyr)
 ```
 
-## Introduction
+# Introduction
 
-# Question/Goal
+## Question/Goal
 
 How can we best advise someone with common stock knowledge to help them succeed in making money using the Moving Averages strategy?
 
-# Background and Motivation
+## Background and Motivation
 
   It's no secret that trading stocks have proven complicated and challenging. Many people gain tremendous fortunes, while others lose everything. Traders utilize many strategies to help them make the most of their invested money in the market. There are countless strategies that could be utilized, as each trader could have their own strategy, but there are also well-known strategies. According to Investopedia, there are four common trend trading strategies: Moving Averages, Moving Averages Convergence Divergence (MACD), Relative Strength Index (RSI), and On-Balance Volume (OBV) (Mitchell, 2024). For the purposes of this analysis, we chose to analyze Moving Averages. Moving Averages use a small and large number of daily averages to help predict the stock market trends and help traders know when to buy or sell a particular stock. Both the large and small numbers represent the daily average of previous days. For example, if the smaller average were 20, we would average the 20 days prior to the current day. The trader can use any set of numbers when determining the length of the averages. Some traders opt to use shorter periods, while others opt for more extended periods to see longer averages and trends in the market. Using our shiny app, we explore the best ways to utilize the Moving Averages strategy and how traders can best spend their money to make more money. 
   
-# Data Background 
+## Data Background 
 
 Sectors
 
@@ -76,9 +76,13 @@ Nasdaq Prices
 - Included data on all ETFs (Exchange-Traded Fund) and Stocks
 - Data found on Kaggle.com
 
-# Data Engagement
+## Data Engagement
 
 The data we found was clean and complete, allowing us to perform a full analysis. The data were found from ethical websites trusted by the data science community. One should be careful trying to model stock data because all of the data is relatively correlated. There are many considerations when interpreting stock data, so a trader must be careful where they spend their money. Because we are advising our audience on a particular trading strategy, it is imperative that the data we use is accurate and provides quality information to the audience. A misinterpretation of data or analysis could potentially lead the audience to waste money on certain stocks or trades at the wrong time if not appropriately understood. These consequences can be mitigated by ensuring our audience understands the data and our analysis in full depth before making potential life-changing decisions to buy or sell stock. 
 
 Simply using moving averages doesn’t necessarily guarantee a trader will make money. Tradethatswing.com claims, “Yes and no. Putting a moving average on a chart and then taking random trades based on it isn’t going to generate consistent returns.” This claim is backed by our analysis, which shows that we often lose money on our trades more than half of the time. Traders can refer to websites like https://www.sec.gov/about/reports-publications/investor-publications/day-trading-your-dollars-at-risk, which discusses potential risks when trading and urges traders to be careful when making trades. Our team has no prior experience using moving averages but notes the potential success behind it and the potential risks. 
+
+# Data Analysis 
+
+## Using Our Shiny App to Analyze Apple
 
