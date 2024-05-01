@@ -47,6 +47,10 @@ my_stocks_sector <- function(sector){
 ### Main MA Crossover Code
 
 ```{r}
+# Ticker is the stock (ex. AAPL)
+# filterDate is a boolean that is true if you want to filter, false if not
+# date is the first dats that you want your data to start from
+# date2 is the date you want your data to end on
 my_filter_date <- function(ticker,filterDate,date,date2){
   prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
   if(filterDate){
