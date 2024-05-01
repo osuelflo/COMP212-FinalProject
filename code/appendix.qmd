@@ -47,6 +47,10 @@ my_stocks_sector <- function(sector){
 ### Main MA Crossover Code
 
 ```{r}
+# Ticker is the stock (ex. AAPL)
+# filterDate is a boolean that is true if you want to filter, false if not
+# date is the first dats that you want your data to start from
+# date2 is the date you want your data to end on
 my_filter_date <- function(ticker,filterDate,date,date2){
   prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
   if(filterDate){
@@ -68,12 +72,16 @@ my_filter_date <- function(ticker,filterDate,date,date2){
   return(prices)
 }
 
+# df is a dataframe of pricing data
+# n is length of shorter moving average
+# n2 is length of longer moving average
 my_sma <- function(df,n,n2){ # Uses the SMA function from the TTR package to get the moving averages of length n and n2
   return(df %>% 
            mutate(sma1 = SMA(df$Close,n=n),
                   sma2 = SMA(df$Close,n=n2)))
 }
 
+# df is a dataframe
 fix_na <- function(df){ # Function that finds missing data, and replaces that row with the previous row
   bad <-which(is.na(df))
   bad2 <- unique(bad %% nrow(df))
@@ -86,6 +94,12 @@ fix_na <- function(df){ # Function that finds missing data, and replaces that ro
   return(df)
 }
 
+# Ticker is the stock (ex. AAPL)
+# ma1 is desired length of shorter moving average
+# ma2 is desired length of longer moving average
+# filterDate is a boolean that is true if you want to filter, false if not
+# date is the first dats that you want your data to start from
+# date2 is the date you want your data to end on
 my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
   prices <- my_filter_date(ticker,filterDate,date,date2)
   # Initializing values
@@ -149,6 +163,8 @@ my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
 
 ```{r}
 # Function that calculates the value of the account if 1000 dollars was put into SPY (Basically the S&P 500), and held for the duration of the time period.
+# date is the first dats that you want your data to start from
+# filterDate is a boolean that is true if you want to filter, false if not
 my_spy_hold <- function(date=NA,filterDate=FALSE){
   # Filtering date by input
   if(filterDate){
@@ -181,6 +197,7 @@ my_spy_hold <- function(date=NA,filterDate=FALSE){
 
 ```{r}
 # Iterating through a list of stocks to find the stock with the smallest amount of data (i.e. the date of the first row is the latest)
+# stocks is a list of tickers to iterate through
 find_min_date <- function(stocks){
   df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[1]
@@ -195,6 +212,7 @@ find_min_date <- function(stocks){
 }
 
 # Iterating through a list of stocks to find the stock with the earliest last row (i.e. the date on the last row of data is the earliest)
+# stocks is a list of tickers to iterate through
 find_max_date <- function(stocks){
   df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[nrow(df)]
@@ -209,6 +227,9 @@ find_max_date <- function(stocks){
 }
 
 # Function to analyze profit of MA crossover strategy across a sector.
+# sector is whatever sector you want to analyze
+# ma1 is desired length of shorter moving average
+# ma2 is desired length of longer moving average
 my_profit_sectors <- function(sector,ma1,ma2){
   tickers <- SECTOR_LIST %>% filter(Sector == sector)
   stocks <- tickers$Ticker
@@ -235,6 +256,8 @@ my_profit_sectors <- function(sector,ma1,ma2){
 }
 
 # Collapses down a results table, summing wins and losses and calculating total percent gain, and finding avergae percent gain depending on value of collapseAPG
+# results is the resulting dataframe from one of the main profit functions
+# collapseAPG is a boolean that is true if we want cumulative percent gain, and false if we want average percent gain (i.e. takign cumulative percent gain and dividing by total trades)
 my_collapse_table <- function(results,collapseAPG=FALSE){
   if(collapseAPG){
     totals<-results[nrow(results),]
@@ -261,6 +284,7 @@ my_collapse_table <- function(results,collapseAPG=FALSE){
 ### Analyzing Strategy On Different Combinations of Moving Averages
 
 ```{r}
+# ticker represents a stock ticker (ex. AAPL)
 my_part_ma_cross <- function(ticker){
   # 250 combinations of moving averages
   winsVec <- rep(0,250)
