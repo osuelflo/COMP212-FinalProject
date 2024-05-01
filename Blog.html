@@ -93,19 +93,18 @@ h4.date {
   text-align: center;
 }
 </style>
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-</section>
-<section id="questiongoal" class="level1">
-<h1>Question/Goal</h1>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<section id="questiongoal" class="level2">
+<h2 class="anchored" data-anchor-id="questiongoal">Question/Goal</h2>
 <p>How can we best advise someone with common stock knowledge to help them succeed in making money using the Moving Averages strategy?</p>
 </section>
-<section id="background-and-motivation" class="level1">
-<h1>Background and Motivation</h1>
+<section id="background-and-motivation" class="level2">
+<h2 class="anchored" data-anchor-id="background-and-motivation">Background and Motivation</h2>
 <p>It’s no secret that trading stocks have proven complicated and challenging. Many people gain tremendous fortunes, while others lose everything. Traders utilize many strategies to help them make the most of their invested money in the market. There are countless strategies that could be utilized, as each trader could have their own strategy, but there are also well-known strategies. According to Investopedia, there are four common trend trading strategies: Moving Averages, Moving Averages Convergence Divergence (MACD), Relative Strength Index (RSI), and On-Balance Volume (OBV) (Mitchell, 2024). For the purposes of this analysis, we chose to analyze Moving Averages. Moving Averages use a small and large number of daily averages to help predict the stock market trends and help traders know when to buy or sell a particular stock. Both the large and small numbers represent the daily average of previous days. For example, if the smaller average were 20, we would average the 20 days prior to the current day. The trader can use any set of numbers when determining the length of the averages. Some traders opt to use shorter periods, while others opt for more extended periods to see longer averages and trends in the market. Using our shiny app, we explore the best ways to utilize the Moving Averages strategy and how traders can best spend their money to make more money.</p>
 </section>
-<section id="data-background" class="level1">
-<h1>Data Background</h1>
+<section id="data-background" class="level2">
+<h2 class="anchored" data-anchor-id="data-background">Data Background</h2>
 <p>Sectors</p>
 <ul>
 <li>Global Industry Classification Standards for stock market sectors (GICS)</li>
@@ -120,10 +119,43 @@ h4.date {
 <li>Data found on Kaggle.com</li>
 </ul>
 </section>
-<section id="data-engagement" class="level1">
-<h1>Data Engagement</h1>
+<section id="key-definitions" class="level2">
+<h2 class="anchored" data-anchor-id="key-definitions">Key Definitions</h2>
+<ul>
+<li>MA: A moving average, or MA, is a lagging indicator that is popular among traders as a way to take trades in the stock market. A moving average has a length <code>n</code>, and is calculated by finding the average of the previous <code>n</code> daily closing prices of the stock.</li>
+<li>Strategy: The Moving Average Crossover Strategy that will be using works as follows: We take two moving averages, designating one as the shorter timeframe moving average, and one as the longer moving average. If the shorter time frame moving average crosses over the longer timeframe one (i.e.&nbsp;the value of the shorter one goes from less than the longer one to greater than), we buy the stock. Once the shorter moving average crosses back below the longer moving average, we sell.</li>
+</ul>
+</section>
+<section id="data-engagement" class="level2">
+<h2 class="anchored" data-anchor-id="data-engagement">Data Engagement</h2>
 <p>The data we found was clean and complete, allowing us to perform a full analysis. The data were found from ethical websites trusted by the data science community. One should be careful trying to model stock data because all of the data is relatively correlated. There are many considerations when interpreting stock data, so a trader must be careful where they spend their money. Because we are advising our audience on a particular trading strategy, it is imperative that the data we use is accurate and provides quality information to the audience. A misinterpretation of data or analysis could potentially lead the audience to waste money on certain stocks or trades at the wrong time if not appropriately understood. These consequences can be mitigated by ensuring our audience understands the data and our analysis in full depth before making potential life-changing decisions to buy or sell stock.</p>
 <p>Simply using moving averages doesn’t necessarily guarantee a trader will make money. Tradethatswing.com claims, “Yes and no. Putting a moving average on a chart and then taking random trades based on it isn’t going to generate consistent returns.” This claim is backed by our analysis, which shows that we often lose money on our trades more than half of the time. Traders can refer to websites like https://www.sec.gov/about/reports-publications/investor-publications/day-trading-your-dollars-at-risk, which discusses potential risks when trading and urges traders to be careful when making trades. Our team has no prior experience using moving averages but notes the potential success behind it and the potential risks.</p>
+</section>
+</section>
+<section id="data-analysis" class="level1">
+<h1>Data Analysis</h1>
+<section id="using-our-shiny-app-to-analyze-apple" class="level2">
+<h2 class="anchored" data-anchor-id="using-our-shiny-app-to-analyze-apple">Using Our Shiny App to Analyze Apple</h2>
+<section id="sectors" class="level3">
+<h3 class="anchored" data-anchor-id="sectors">Sectors</h3>
+<p>Starting at the sector level, let’s take a look at how much the consumer-discretionary sector made using the default time frames: 10 days for the shorter one and 50 days for the longer one. We see that if we used the MA strategy on every stock in the consumer-discretionary sector, we would’ve made more using the MA strategy than keeping our money invested in the sector.</p>
+</section>
+<section id="basic-ma-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="basic-ma-strategy">Basic MA Strategy</h3>
+<p>We’re going to start by picking a simple MA combination for Tesla (TSLA). Using the default time frames for our app, we’ll set the shorter one at 10 days, and the longer one at 50 days. Here is a section of our plot that shows the moving averages. A green “x” means we should buy and a red “x” means we should sell.</p>
+<p>Comparing the MA strategy to just leaving our money in the stock, we can see that we would’ve made significantly more if we had just left our money invested in Tesla than using the MA strategy on the default days.</p>
+<p>Over time, we see that we lost more trades than we won with a win percentage of 42.86% and our average percent gain was 13.38.</p>
+</section>
+<section id="finding-the-best-ma-combination" class="level3">
+<h3 class="anchored" data-anchor-id="finding-the-best-ma-combination">Finding the Best MA Combination</h3>
+<p>Now that we’ve taken a look at a sector and an individual stock from that sector, let’s find the best combination of the shorter and longer averages to make the most money for Tesla.</p>
+<p>There are a couple of combinations that would be a good fit to maximize our profit, but we’re going to try 43.75 days for the longer one and 35 for the shorter one. Using these numbers for our averages improves our winning percentage by about 2%, but bumps up our average percent gain by almost 4%.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Using the moving averages strategy has its pros and cons. It helps to ensure that you never have to worry about the stock market crashing because you are always constantly buying and selling. However, it often makes significantly less money than just keeping your money invested in a certain stock. Using the moving averages strategy is a safe bet, most of the time, and could help a trader make money with lower risk.</p>
+</section>
 </section>
 
 </main>

@@ -51,6 +51,7 @@ library(dplyr)
 library(tidyr)
 ```
 
+
 # Introduction
 
 ## Question/Goal
@@ -112,4 +113,5 @@ There are a couple of combinations that would be a good fit to maximize our prof
 ## Conclusion
 
 Using the moving averages strategy has its pros and cons. It helps to ensure that you never have to worry about the stock market crashing because you are always constantly buying and selling. However, it often makes significantly less money than just keeping your money invested in a certain stock. Using the moving averages strategy is a safe bet, most of the time, and could help a trader make money with lower risk. 
+
 
