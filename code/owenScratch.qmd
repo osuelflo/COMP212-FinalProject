@@ -313,7 +313,7 @@ res2
 
 
 ```{r}
-res <-my_all_ma_cross("AAPL")
+res <-my_all_ma_cross("TSLA")
 res
 ```
 

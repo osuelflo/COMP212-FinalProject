@@ -1,0 +1,476 @@
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(stringr)
+```
+
+```{r}
+# #Read in inflation data 
+Inflation <- read.csv("data/historicalinflationcalculator.csv") %>%
+  filter(Year != 2024) %>%
+  select(-Ave) %>% 
+  mutate(Feb = as.double(Feb)) %>% 
+  pivot_longer(Jan:Dec, names_to = "Month", values_to = "Inflation")
+```
+
+```{r}
+all_csvs<- c("data/nasdaq_prices/stocks/UPS.csv", "data/nasdaq_prices/stocks/MMM.csv", "data/nasdaq_prices/stocks/AEP.csv", "data/nasdaq_prices/stocks/UNH.csv", "data/nasdaq_prices/stocks/JPM.csv", "data/nasdaq_prices/stocks/AMZN.csv", "data/nasdaq_prices/stocks/MC.csv", "data/nasdaq_prices/stocks/KO.csv", "data/nasdaq_prices/stocks/PG.csv", "data/nasdaq_prices/stocks/AAPL.csv", "data/nasdaq_prices/stocks/MSFT.csv", "data/nasdaq_prices/stocks/GOOG.csv", "data/nasdaq_prices/stocks/AMT.csv", "data/nasdaq_prices/stocks/SPG.csv", "data/nasdaq_prices/stocks/XOM.csv", "data/nasdaq_prices/stocks/SHW.csv")
+
+container <- vector("list", length(all_csvs))
+
+clean_data <- function(path){
+  data<-read.csv(path)
+  stockName <- str_extract(path, "[^/]+(?=\\.csv$)")
+  data %>%
+    mutate(pRange = High - Low,
+           PriceDirection = ifelse(Open < Close, "Increase", ifelse(Open > Close, "Decrease", "No Change")),
+           DailyPricePercentage = ((Close - Open) / Open) * 100,
+           DailyPriceChange = Open - Close,
+           PriceVolatilityPercent = ((High - Low) / Open) * 100, 
+           Ticker = stockName)
+}
+
+for (i in seq_along(all_csvs)){
+  cleaned_data <- clean_data(all_csvs[i])
+  container[[i]] <- cleaned_data
+}
+
+stock_data <- container%>%
+  bind_rows()
+```
+
+
+```{r}
+sector<-tibble(
+  Ticker = c("UPS", "MMM", "AEP", "UNH", "JPM", "AMZN", "MC"," KO", "PG", "AAPL", "MSFT", "GOOG", "AMT", "SPG", "XOM", "SHW"), 
+  Sector = c("Industrials", "Industrials", "Utilities", "Healthcare", "Financials", "Consumer Discretionary", "Consumer Discretionary", "Consumer Staples", "Consumer Staples", "Information Technology", "Information Technology", "Communication Services", "Real Estate", "Real Estate", "Energy", "Materials")
+)
+
+stock_data_joined<-stock_data %>% 
+  mutate(Year = year(Date), Month = as.character(month(Date, label = TRUE))) %>% 
+  left_join(Inflation, by = c("Year", "Month")) %>% 
+  left_join(sector, by = "Ticker")
+  
+  
+```
+
+
+
+```{r}
+ggplot(stock_data_joined, aes(x=Inflation, y=DailyPriceChange))+
+  geom_point()+
+  facet_wrap(~Sector)
+
+```
+
+```{r}
+stock_data_joined %>% 
+  group_by(Sector, Year) %>% 
+  summarize(mean = mean(Close, na.rm = TRUE)) %>% 
+  filter(!is.na(Sector)) %>% 
+  ggplot(aes(x=Year, y=mean))+
+  geom_point()+
+  facet_wrap(~Sector)+
+  theme_minimal()+
+  labs(x = "Year", y = "Mean Closing Price", title = "Mean Closing Price per Sector by Year")+
+  theme(panel.spacing = unit(1, "lines"))
+```
+
+```{r, fig.width=15}
+stock_data_joined %>%
+  group_by(Sector, Month) %>%
+  summarise(mean_prange = mean(pRange, na.rm = TRUE)) %>% 
+  filter(!is.na(Sector)) %>% 
+  mutate(Month = fct_relevel(Month, month.abb)) %>% 
+  ggplot(aes(x=Month, y=mean_prange))+
+  geom_point()+
+  facet_wrap(~Sector)+
+  theme_minimal()+
+  labs(x= "Months", y = "Mean Price Range", title = "Mean Price Range per Month by Sector")+
+  theme(panel.spacing = unit(1, "lines"))
+```
+
+
+# Appendix
+
+```{r,message=FALSE,error=FALSE,warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(TTR)
+library(plotly)
+library(rvest)
+```
+
+
+```{r}
+SECTOR_LIST <- read_csv("../data/sectors.csv") # Result csv from the below function
+sectors <- unique(SECTOR_LIST$Sector) # Getting a list of the 11 sectors
+
+# Function to scrape stockanalysis.com for sector information
+my_sectors <- function(){
+  # Initializing two result vectors
+  tickers <- rep(NA,110)
+  sectorVec <- rep(NA,110)
+  j <- 0
+  for(sec in sectors){
+    print(sec)
+    url <- str_glue("https://stockanalysis.com/stocks/sector/{sec}")
+    page <- read_html(url)
+    res<-page %>% 
+      html_elements("td") %>% # Grabbing the 'td' element
+      html_text()
+    for(i in 1:10){ # Going through and getting the ticker of the top ten biggest stocks
+      tickers[10*j+i] <- res[2+7*(i-1)] # Not pretty, but will work
+      sectorVec[10*j+i] <- sec
+    }
+    j<- j+1
+  }
+  return(data.frame(Ticker=tickers,Sector=sectorVec)) # Returns a dataframe where each row has a ticker and corresponding sector
+}
+
+# Gets the list of tickers from a given sector
+my_stocks_sector <- function(sector){
+  temp <- SECTOR_LIST %>% filter(Sector == sector)
+  return(data.frame(Tickers=temp$Ticker))
+}
+```
+
+
+```{r}
+my_sectors()
+
+my_stocks_sector("technology")
+```
+
+### Main MA Crossover Code
+
+```{r}
+# Ticker is the stock (ex. AAPL)
+# filterDate is a boolean that is true if you want to filter, false if not
+# date is the first dats that you want your data to start from
+# date2 is the date you want your data to end on
+my_filter_date <- function(ticker,filterDate,date,date2){
+  prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+  if(filterDate){
+    prices<- fix_na(prices)
+    prices<- prices %>% 
+      filter(Date >=date) %>%
+      filter(Date <= date2) %>% 
+      my_sma(ma1,ma2) %>% 
+      select(Date,Close,sma1,sma2) %>%
+      drop_na()
+  }
+  else{
+    prices<-fix_na(prices)
+    prices<- prices %>% 
+      my_sma(ma1,ma2) %>% 
+      select(Date,Close,sma1,sma2) %>%
+      drop_na()
+  }
+  return(prices)
+}
+
+# df is a dataframe of pricing data
+# n is length of shorter moving average
+# n2 is length of longer moving average
+my_sma <- function(df,n,n2){ # Uses the SMA function from the TTR package to get the moving averages of length n and n2
+  return(df %>% 
+           mutate(sma1 = SMA(df$Close,n=n),
+                  sma2 = SMA(df$Close,n=n2)))
+}
+
+# df is a dataframe
+fix_na <- function(df){ # Function that finds missing data, and replaces that row with the previous row
+  bad <-which(is.na(df))
+  bad2 <- unique(bad %% nrow(df))
+  if(0 %in% bad2){
+    df <- df[1:nrow(df)-1,]
+  }
+  else{
+    df[bad2,] <- df[bad2-1,]
+  }
+  return(df)
+}
+
+# Ticker is the stock (ex. AAPL)
+# ma1 is desired length of shorter moving average
+# ma2 is desired length of longer moving average
+# filterDate is a boolean that is true if you want to filter, false if not
+# date is the first dats that you want your data to start from
+# date2 is the date you want your data to end on
+my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
+  prices <- my_filter_date(ticker,filterDate,date,date2)
+  # Initializing values
+  curPrice <- prices$Close[1] # current price of the stock
+  prevPrice <- 0 # variable that keeps track of price of stock when we entered trade
+  prevHoldPrice <- curPrice # Keeps track of value of stock at beginning of time period
+  account <- 1000 # Keeps track of the current value of the MA crossover account
+  prevAccount <- 1000 # Keeps track of the previous account value of the MA crossover account to help with calculating percentage gain on a trade
+  holdAccount <- 1000 # Keeps track of the current value of the account that is just holding the stock
+  wins <- 0 # Number of trades that made money
+  losses <- 0 # Number of trades that lost money
+  # Vectors that will be used to create results dataframe
+  winsVec <- rep(0,nrow(prices))
+  lossesVec <- rep(0,nrow(prices))
+  holdAccountVec <- c(1000,rep(0,nrow(prices)-1))
+  accountVec <- c(1000,rep(0,nrow(prices)-1))
+  buyVec <- rep(FALSE,nrow(prices))
+  sellVec <- rep(FALSE,nrow(prices))
+  pct_GainVec <- rep(0,nrow(prices))
+  i <- 2
+  inTrade <- FALSE # Boolean indicator that states whether or not we are actively in a trade
+  while(i <= nrow(prices)){
+    close <- prices$Close[i]
+    curPrice <- close
+    s1 <- prices$sma1[i]
+    s2 <- prices$sma2[i]
+    holdAccount <- 1000 * (curPrice/prevHoldPrice) # Always update hold account value
+    holdAccountVec[i] <- holdAccount
+    if(inTrade){
+      account <- prevAccount * (curPrice/prevPrice) # Update account value if in trade
+      if(s1 < s2){ # If we are in a trade and shorter moving average crosses below longer one, then we sell
+        inTrade <- FALSE
+        sellVec[i] <- TRUE
+        pct_GainVec[i] <- (account-prevAccount)/prevAccount*100
+        prevAccount <- account
+        if(curPrice > prevPrice){ # If we made money
+          wins <- wins + 1
+        }
+        else{
+          losses <- losses + 1
+        }
+      }
+    }
+    else{ # If we are not in a trade and the shorter moving average crosses above the longer one, then we buy and enter the trade
+      if(s1 > s2 & prices$sma1[i-1] < prices$sma2[i-1]){
+        buyVec[i] <- TRUE
+        inTrade <- TRUE
+        prevPrice <- curPrice
+      }
+    }
+    winsVec[i] <- wins
+    lossesVec[i] <- losses
+    accountVec[i] <- account
+    i <- i+1
+  }
+  return(list(Prices = prices, Results = data.frame(Date = prices$Date,Wins = winsVec, Losses = lossesVec, AccountValue = accountVec, Buy = buyVec, Sell = sellVec,pctGain = pct_GainVec,HoldAccountValue=holdAccountVec)))
+}
+```
+
+
+```{r}
+my_filter_date("AAPL",TRUE,"2010-01-01","2019-01-01")
+```
+
+
+
+### Holding SPY Code
+
+```{r}
+# Function that calculates the value of the account if 1000 dollars was put into SPY (Basically the S&P 500), and held for the duration of the time period.
+# date is the first dats that you want your data to start from
+# filterDate is a boolean that is true if you want to filter, false if not
+my_spy_hold <- function(date=NA,filterDate=FALSE){
+  # Filtering date by input
+  if(filterDate){
+    prices <- read_csv(str_glue("../data/nasdaq_prices/etfs/SPY.csv")) %>% 
+      filter(Date >= date) %>% 
+      select(Date,Close)
+  }
+  else{
+    prices <- read_csv(str_glue("../data/nasdaq_prices/etfs/SPY.csv")) %>% 
+      select(Date,Close)
+  }
+  i <- 2
+  accountValVec <- rep(0,nrow(prices))
+  accountValue <- 1000 # Value of the account at initialization
+  accountValVec[1] <- 1000
+  prevPrice <- prices$Close[1]
+  while(i <= nrow(prices)){
+    curPrice <- prices$Close[i]
+    accountValue <- 1000 * (curPrice/prevPrice)
+    accountValVec[i] <- accountValue
+    i <- i +1
+  }
+  return(data.frame(Date = prices$Date,AccountValue = accountValVec))
+}
+```
+
+
+### Code For Sector Analysis of Shiny App
+
+
+```{r}
+# Iterating through a list of stocks to find the stock with the smallest amount of data (i.e. the date of the first row is the latest)
+# stocks is a list of tickers to iterate through
+find_min_date <- function(stocks){
+  df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  date <- df$Date[1]
+  for(i in 2:length(stocks)){
+    df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    date2 <- df$Date[1]
+    if(date2 > date){
+      date <- date2
+    }
+  }
+  return(date)
+}
+
+# Iterating through a list of stocks to find the stock with the earliest last row (i.e. the date on the last row of data is the earliest)
+# stocks is a list of tickers to iterate through
+find_max_date <- function(stocks){
+  df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  date <- df$Date[nrow(df)]
+  for(i in 2:length(stocks)){
+    df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    date2 <- df$Date[nrow(df)]
+    if(date2 < date){
+      date <- date2
+    }
+  }
+  return(date)
+}
+
+# Function to analyze profit of MA crossover strategy across a sector.
+# sector is whatever sector you want to analyze
+# ma1 is desired length of shorter moving average
+# ma2 is desired length of longer moving average
+my_profit_sectors <- function(sector,ma1,ma2){
+  tickers <- SECTOR_LIST %>% filter(Sector == sector)
+  stocks <- tickers$Ticker
+  date <- find_min_date(stocks)
+  date2 <- find_max_date(stocks)
+  res <- my_ma_cross(stocks[1],ma1,ma2,date,date2,filterDate = TRUE)$Results
+  prof1 <- res %>% select(Date,AccountValue,HoldAccountValue)
+  res1 <- my_collapse_table(res,collapseAPG = TRUE)
+  for(i in 2:length(stocks)){
+    res <- my_ma_cross(stocks[i],ma1,ma2,date,date2,filterDate = TRUE)$Results
+    prof2 <- res %>% select(Date,AccountValue,HoldAccountValue)
+    res2 <- my_collapse_table(res,collapseAPG = TRUE)
+    prof1$AccountValue <- prof1$AccountValue + prof2$AccountValue
+    prof1$HoldAccountValue <- prof1$HoldAccountValue + prof2$HoldAccountValue
+    res1$AccountValue <- res1$AccountValue + res2$AccountValue
+    res1$TotalTrades <- res1$TotalTrades + res2$TotalTrades
+    res1$Wins <- res1$Wins + res2$Wins
+    res1$Losses <- res1$Losses + res2$Losses
+    res1$AvgPctGain <- res1$AvgPctGain + res2$AvgPctGain
+  }
+  res1$WinPct <- res1$Wins/res1$TotalTrades*100 # Re-calculating win percentage across all tickers within a sector
+  res1$AvgPctGain <- res1$AvgPctGain/res1$TotalTrades # Dividing by total trades, as the average percent gain was scaled by total trades for each stock so calculations would be easier.
+  return(list(Results=res1,Profit=prof1))
+}
+
+# Collapses down a results table, summing wins and losses and calculating total percent gain, and finding avergae percent gain depending on value of collapseAPG
+# results is the resulting dataframe from one of the main profit functions
+# collapseAPG is a boolean that is true if we want cumulative percent gain, and false if we want average percent gain (i.e. takign cumulative percent gain and dividing by total trades)
+my_collapse_table <- function(results,collapseAPG=FALSE){
+  if(collapseAPG){
+    totals<-results[nrow(results),]
+    totals<-totals %>% 
+      mutate(TotalTrades = Wins+Losses,
+             WinPct = Wins/(Losses+Wins)*100,
+             AvgPctGain = sum(results$pctGain)) %>% # This is useful for aggregating results from multiple stocks in the sector analysis
+      select(TotalTrades,Wins,Losses,WinPct,AccountValue,AvgPctGain)
+    return(totals)
+  }
+  else{
+    totals<-results[nrow(results),]
+    totals<-totals %>% 
+      mutate(TotalTrades = Wins+Losses,
+             WinPct = Wins/(Losses+Wins)*100,
+             AvgPctGain = sum(results$pctGain)/TotalTrades) %>% 
+      select(TotalTrades,Wins,Losses,WinPct,AccountValue,AvgPctGain)
+    return(totals)
+  }
+}
+```
+
+
+### Analyzing Strategy On Different Combinations of Moving Averages
+
+```{r}
+# ticker represents a stock ticker (ex. AAPL)
+my_part_ma_cross <- function(ticker){
+  # 250 combinations of moving averages
+  winsVec <- rep(0,250)
+  lossesVec <- rep(0,250)
+  totalTradesVec <- rep(0,250)
+  accountVec <- rep(0,250)
+  pct_GainVec <- rep(0,250)
+  ma1Vec <- rep(0,250)
+  ma2Vec <- rep(0,250)
+  winRateVec <- rep(0,250)
+  j<- 1
+  p <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+  for(ma1 in seq(from=5,to=50,by=5)){
+    for(ma2 in seq(from=1.2,to=6,by=0.2)){ # value of ma2 is ratio of length of long MA to short MA
+      prices <- p %>% 
+        my_sma(ma1,round(ma1*ma2)) %>% 
+        select(Date,Close,sma1,sma2) %>%
+        drop_na()
+      curPrice <- prices$Close[1]
+      prevPrice <- 0
+      prevAccount <- 1000
+      account <- 1000
+      wins <- 0
+      losses <- 0
+      pctGain <- 0
+      i <- 2
+      inTrade <- FALSE
+      while(i <= nrow(prices)){
+        close <- prices$Close[i]
+        curPrice <- close
+        s1 <- prices$sma1[i]
+        s2 <- prices$sma2[i]
+        if(inTrade){
+          account <- prevAccount * (curPrice/prevPrice)
+          if(s1 < s2){
+            inTrade <- FALSE
+            pctGain <- pctGain+(account-prevAccount)/prevAccount*100
+            prevAccount <- account
+            if(curPrice > prevPrice){
+              wins <- wins + 1
+            }
+            else{
+              losses <- losses + 1
+            }
+          }
+        }
+        else{
+          if(s1 > s2 & prices$sma1[i-1] < prices$sma2[i-1]){
+            inTrade <- TRUE
+            prevPrice <- curPrice
+          }
+        }
+        i <- i+1
+      }
+      winsVec[j] <- wins
+      lossesVec[j] <- losses
+      totalTradesVec[j] <- wins+losses
+      accountVec[j] <- account
+      pct_GainVec[j] <- pctGain/(wins+losses)
+      ma1Vec[j] <- ma1
+      ma2Vec[j] <- ma2
+      winRateVec[j] <- wins/(wins+losses)*100
+      print(j)
+      j<-j+1
+    }
+  }
+  return(data.frame(MA1 = ma1Vec,
+                    MA2 = ma2Vec,
+                    Wins = winsVec,
+                    Losses = lossesVec,
+                    AccountValue = accountVec,
+                    AvgPctGain = pct_GainVec,
+                    WinRate = winRateVec))
+}
+```
+
+
+
+
+
+
+
+
