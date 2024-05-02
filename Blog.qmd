@@ -50,7 +50,7 @@ library(rvest)
 ```
 
 ```{r,include=FALSE}
-SECTOR_LIST <- read_csv("data/sectors.csv") # Result csv from the below function
+SECTOR_LIST <- read_csv("backtester/data/sectors.csv") # Result csv from the below function
 sectors <- unique(SECTOR_LIST$Sector) # Getting a list of the 11 sectors
 
 # Function to scrape stockanalysis.com for sector information
@@ -91,7 +91,7 @@ my_stocks_sector <- function(sector){
 # date is the first dats that you want your data to start from
 # date2 is the date you want your data to end on
 my_filter_date <- function(ticker,ma1,ma2,filterDate,date,date2){
-  prices <- read_csv(str_glue("data/nasdaq_prices/stocks/{ticker}.csv"))
+  prices <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{ticker}.csv"))
   if(filterDate){
     prices<- fix_na(prices)
     prices<- prices %>% 
@@ -206,12 +206,12 @@ my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
 my_spy_hold <- function(date=NA,filterDate=FALSE){
   # Filtering date by input
   if(filterDate){
-    prices <- read_csv(str_glue("data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
       filter(Date >= date) %>% 
       select(Date,Close)
   }
   else{
-    prices <- read_csv(str_glue("data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
       select(Date,Close)
   }
   i <- 2
@@ -236,10 +236,10 @@ my_spy_hold <- function(date=NA,filterDate=FALSE){
 # Iterating through a list of stocks to find the stock with the smallest amount of data (i.e. the date of the first row is the latest)
 # stocks is a list of tickers to iterate through
 find_min_date <- function(stocks){
-  df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[1]
   for(i in 2:length(stocks)){
-    df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[i]}.csv"))
     date2 <- df$Date[1]
     if(date2 > date){
       date <- date2
@@ -251,10 +251,10 @@ find_min_date <- function(stocks){
 # Iterating through a list of stocks to find the stock with the earliest last row (i.e. the date on the last row of data is the earliest)
 # stocks is a list of tickers to iterate through
 find_max_date <- function(stocks){
-  df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[nrow(df)]
   for(i in 2:length(stocks)){
-    df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[i]}.csv"))
     date2 <- df$Date[nrow(df)]
     if(date2 < date){
       date <- date2
@@ -333,7 +333,7 @@ my_part_ma_cross <- function(ticker){
   ma2Vec <- rep(0,250)
   winRateVec <- rep(0,250)
   j<- 1
-  p <- read_csv(str_glue("data/nasdaq_prices/stocks/{ticker}.csv"))
+  p <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{ticker}.csv"))
   for(ma1 in seq(from=5,to=50,by=5)){
     for(ma2 in seq(from=1.2,to=6,by=0.2)){ # value of ma2 is ratio of length of long MA to short MA
       prices <- p %>% 
@@ -567,7 +567,7 @@ library(rvest)
 
 ### Scraping 11 main sectors and the top 10 biggest stocks in each sector
 ```{r,message=FALSE,error=FALSE,warning=FALSE,include=TRUE,echo=TRUE}
-SECTOR_LIST <- read_csv("data/sectors.csv") # Result csv from the below function
+SECTOR_LIST <- read_csv("backtester/data/sectors.csv") # Result csv from the below function
 sectors <- unique(SECTOR_LIST$Sector) # Getting a list of the 11 sectors
 
 # Function to scrape stockanalysis.com for sector information
@@ -609,7 +609,7 @@ my_stocks_sector <- function(sector){
 # date is the first dats that you want your data to start from
 # date2 is the date you want your data to end on
 my_filter_date <- function(ticker,ma1,ma2,filterDate,date,date2){
-  prices <- read_csv(str_glue("data/nasdaq_prices/stocks/{ticker}.csv"))
+  prices <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{ticker}.csv"))
   if(filterDate){
     prices<- fix_na(prices)
     prices<- prices %>% 
@@ -725,12 +725,12 @@ my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
 my_spy_hold <- function(date=NA,filterDate=FALSE){
   # Filtering date by input
   if(filterDate){
-    prices <- read_csv(str_glue("data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
       filter(Date >= date) %>% 
       select(Date,Close)
   }
   else{
-    prices <- read_csv(str_glue("data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
       select(Date,Close)
   }
   i <- 2
@@ -756,10 +756,10 @@ my_spy_hold <- function(date=NA,filterDate=FALSE){
 # Iterating through a list of stocks to find the stock with the smallest amount of data (i.e. the date of the first row is the latest)
 # stocks is a list of tickers to iterate through
 find_min_date <- function(stocks){
-  df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[1]
   for(i in 2:length(stocks)){
-    df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[i]}.csv"))
     date2 <- df$Date[1]
     if(date2 > date){
       date <- date2
@@ -771,10 +771,10 @@ find_min_date <- function(stocks){
 # Iterating through a list of stocks to find the stock with the earliest last row (i.e. the date on the last row of data is the earliest)
 # stocks is a list of tickers to iterate through
 find_max_date <- function(stocks){
-  df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[nrow(df)]
   for(i in 2:length(stocks)){
-    df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    df <-read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{stocks[i]}.csv"))
     date2 <- df$Date[nrow(df)]
     if(date2 < date){
       date <- date2
@@ -853,7 +853,7 @@ my_part_ma_cross <- function(ticker){
   ma2Vec <- rep(0,250)
   winRateVec <- rep(0,250)
   j<- 1
-  p <- read_csv(str_glue("data/nasdaq_prices/stocks/{ticker}.csv"))
+  p <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/{ticker}.csv"))
   for(ma1 in seq(from=5,to=50,by=5)){
     for(ma2 in seq(from=1.2,to=6,by=0.2)){ # value of ma2 is ratio of length of long MA to short MA
       prices <- p %>% 
