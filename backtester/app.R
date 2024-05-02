@@ -442,8 +442,6 @@ server <- function(input, output) {
     my_spy_hold(date=d,filterDate = TRUE)
   })
   
-  
-  
   output$chart <- renderPlotly({ # First viz on first tab
     p<- ggplot()+
       geom_line(data=combined(),aes(x = Date,y = Close, color = 'black'))+
@@ -451,7 +449,7 @@ server <- function(input, output) {
       geom_line(data=combined(),aes(x = Date,y=sma2,color = 'orange'))+
       geom_point(data=sells(),aes(x = Date,y=sma1),shape=4,size=2,color="red")+
       geom_point(data=buys(),aes(x = Date,y=sma1),shape=4,size=2,color="green")+
-      labs(color = "Line Type",y="Price",x="Date",title=str_glue("{input$ticker} Chart",subtitle="Interactive Chart. Green X's represent where trades were taken, and Red X's represent where trades were closed."))+
+      labs(color = "Line Type",y="Price",x="Date",title=str_glue("{input$ticker} Chart"),subtitle="Interactive Chart. Green X's represent where trades were taken, and Red X's represent where trades were closed.")+
       ylim(c(0,max(combined()$Close)*4))+
       scale_color_manual(values = c('black',"blue", "orange"),
                          labels = c(str_glue('{input$ticker} Price'),str_glue('{input$sma1} SMA'),str_glue('{input$sma2} SMA')))+
@@ -474,7 +472,6 @@ server <- function(input, output) {
   output$results <- renderTable({ # Table on bottom of first tab
     my_collapse_table(results())
   })
-  
   
   output$accountValue <- renderPlot({ # Account value heatmap in second tab
     ma_comb() %>% 
