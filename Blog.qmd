@@ -206,12 +206,12 @@ my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
 my_spy_hold <- function(date=NA,filterDate=FALSE){
   # Filtering date by input
   if(filterDate){
-    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/SPY.csv")) %>% 
       filter(Date >= date) %>% 
       select(Date,Close)
   }
   else{
-    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/SPY.csv")) %>% 
       select(Date,Close)
   }
   i <- 2
@@ -725,12 +725,12 @@ my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
 my_spy_hold <- function(date=NA,filterDate=FALSE){
   # Filtering date by input
   if(filterDate){
-    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/SPY.csv")) %>% 
       filter(Date >= date) %>% 
       select(Date,Close)
   }
   else{
-    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("backtester/data/nasdaq_prices/stocks/SPY.csv")) %>% 
       select(Date,Close)
   }
   i <- 2

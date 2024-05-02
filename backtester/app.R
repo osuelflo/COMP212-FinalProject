@@ -27,12 +27,12 @@ fix_na <- function(df){
 
 my_spy_hold <- function(date=NA,filterDate=FALSE){
   if(filterDate){
-    prices <- read_csv(str_glue("../data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("data/nasdaq_prices/stocks/SPY.csv")) %>% 
       filter(Date >= date) %>% 
       select(Date,Close)
   }
   else{
-    prices <- read_csv(str_glue("../data/nasdaq_prices/etfs/SPY.csv")) %>% 
+    prices <- read_csv(str_glue("data/nasdaq_prices/stocks/SPY.csv")) %>% 
       select(Date,Close)
   }
   i <- 2
@@ -55,12 +55,12 @@ my_sma <- function(df,n,n2){
                   sma2 = SMA(df$Close,n=n2)))
 }
 
-fnames <- dir(path="../data/nasdaq_prices/stocks")
+fnames <- dir(path="data/nasdaq_prices/stocks")
 tickers <- lapply(fnames,str_extract,pattern="^[:upper:]+")
 
 my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
   if(filterDate){
-    prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+    prices <- read_csv(str_glue("data/nasdaq_prices/stocks/{ticker}.csv"))
     prices<- fix_na(prices)
     prices<- prices %>% 
       filter(Date >=date) %>%
@@ -70,7 +70,7 @@ my_ma_cross <- function(ticker,ma1,ma2,date=NA,date2=NA,filterDate=FALSE){
       drop_na()
   }
   else{
-    prices <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+    prices <- read_csv(str_glue("data/nasdaq_prices/stocks/{ticker}.csv"))
     prices<-fix_na(prices)
     prices<- prices %>% 
       my_sma(ma1,ma2) %>% 
@@ -150,12 +150,12 @@ my_sectors <- function(){
   }
   return(data.frame(Ticker=tickers,Sector=sectorVec))
 }
-SECTOR_LIST <- read_csv("../data/sectors.csv")
+SECTOR_LIST <- read_csv("data/sectors.csv")
 find_min_date <- function(stocks){
-  df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[1]
   for(i in 2:length(stocks)){
-    df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[i]}.csv"))
     date2 <- df$Date[1]
     if(date2 > date){
       date <- date2
@@ -165,10 +165,10 @@ find_min_date <- function(stocks){
 }
 
 find_max_date <- function(stocks){
-  df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[1]}.csv"))
+  df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[1]}.csv"))
   date <- df$Date[nrow(df)]
   for(i in 2:length(stocks)){
-    df <-read_csv(str_glue("../data/nasdaq_prices/stocks/{stocks[i]}.csv"))
+    df <-read_csv(str_glue("data/nasdaq_prices/stocks/{stocks[i]}.csv"))
     date2 <- df$Date[nrow(df)]
     if(date2 < date){
       date <- date2
@@ -212,7 +212,7 @@ my_part_ma_cross <- function(ticker){
   ma2Vec <- rep(0,250)
   winRateVec <- rep(0,250)
   j<- 1
-  p <- read_csv(str_glue("../data/nasdaq_prices/stocks/{ticker}.csv"))
+  p <- read_csv(str_glue("data/nasdaq_prices/stocks/{ticker}.csv"))
   for(ma1 in seq(from=5,to=50,by=5)){
     for(ma2 in seq(from=1.2,to=6,by=0.2)){
       prices <- p %>% 
